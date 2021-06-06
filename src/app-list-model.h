@@ -1,7 +1,10 @@
-#ifndef DEMOMODEL_H
-#define DEMOMODEL_H
+#ifndef APP_LIST_MODEL
+#define APP_LIST_MODEL
 
 #include <QAbstractListModel>
+#include "file-desktop/file-desktop.h"
+
+using namespace FileDesktop;
 
 class AppListModel : public QAbstractListModel
 {
@@ -21,7 +24,7 @@ public:
     Q_INVOKABLE void activate(const int i);
 
 private:
-    QVector<QString> backing;
+    QVector<FileDesktopListModel> backing;
 };
 
-#endif // DEMOMODEL_H
+#endif // APP_LIST_MODEL

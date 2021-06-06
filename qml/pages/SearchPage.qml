@@ -13,7 +13,7 @@ Page {
         width: searchPage.width
 
         PageHeader {
-            title: "Countries"
+            title: "Applications"
         }
 
         SearchField {
@@ -54,7 +54,7 @@ Page {
         delegate: BackgroundItem {
             Label {
                 x: Theme.horizontalPageMargin
-                text: name
+                text: path
             }
             onClicked: dmodel.activate(index)
         }

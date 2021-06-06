@@ -15,7 +15,9 @@ TARGET = QuickLauncher
 CONFIG += sailfishapp
 
 SOURCES += src/QuickLauncher.cpp \
-    src/app-list-model.cpp
+    src/app-list-model.cpp \
+    src/file-desktop/file-desktop.cpp \
+    src/file-desktop/parser.cpp
 
 DISTFILES += qml/QuickLauncher.qml \
     qml/cover/CoverPage.qml \
@@ -41,4 +43,6 @@ CONFIG += sailfishapp_i18n
 # modify the localized app name in the the .desktop file.
 TRANSLATIONS += translations/QuickLauncher-de.ts
 
-HEADERS += src/app-list-model.h
+HEADERS += src/app-list-model.h \
+    src/file-desktop/file-desktop.h \
+    src/file-desktop/parser.h

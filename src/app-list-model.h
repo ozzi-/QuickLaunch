@@ -21,10 +21,12 @@ public:
 
     QHash<int, QByteArray> roleNames() const;
 
-    Q_INVOKABLE void activate(const int i);
+    Q_INVOKABLE void execute(const int i);
+    Q_INVOKABLE void filter(const QString search);
 
 private:
     QVector<FileDesktopListModel> backing;
+    QVector<FileDesktopListModel> db;
 };
 
 #endif // APP_LIST_MODEL

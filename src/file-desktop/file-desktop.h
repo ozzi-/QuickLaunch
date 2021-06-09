@@ -7,7 +7,9 @@
 
 namespace FileDesktop {
     enum RoleEnum{
-        FDRPath = 1
+        FDRPath = 1,
+        FDRName = 2,
+        FDRIcon = 3,
     };
 
 
@@ -15,11 +17,13 @@ namespace FileDesktop {
     public:
         QString path;
         QString command;
+        QString name;
         QString image;
         explicit FileDesktopListModel();
         explicit FileDesktopListModel(QString path);
-        QVariant getRole(RoleEnum role);
-        void execute();
+        QVariant getRole(const RoleEnum role) const;
+        void execute() const;
+        bool match(const QString search) const;
     };
 }
 

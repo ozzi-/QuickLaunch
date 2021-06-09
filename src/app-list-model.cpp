@@ -2,7 +2,10 @@
 
 #include <QStandardPaths>
 #include<QDirIterator>
+#include <iostream>
 #include "utils/enum-check.h"
+
+#include "file-desktop/parser.h"
 
 AppListModel::AppListModel(QObject *parent) :
     QAbstractListModel(parent)
@@ -16,15 +19,21 @@ AppListModel::AppListModel(QObject *parent) :
         QDirIterator listDir(path, {"*.desktop"});
         while (listDir.hasNext()){
             QString path = listDir.next();
-            backing << FileDesktopListModel(path);
+            auto fd = FileDesktopListModel(path);
+            auto hash = parseFile(path);
+            extractData(path, hash, fd);
+            db << fd;
             // Use this: https://github.com/albertlauncher/plugins/blob/b4cac28be7b265027b00279baba14086d97c4d07/applications/src/extension.cpp to parse the files .Desktop
         }
     }
+    this->filter(QString(""));
 }
 
 QHash<int, QByteArray> AppListModel::roleNames() const {
     QHash<int, QByteArray> roles;
-    roles[FDRPath] = "`path";
+    roles[FDRPath] = "path";
+    roles[FDRName] = "name";
+    roles[FDRIcon] = "icon";
     return roles;
 }
 
@@ -33,25 +42,28 @@ QVariant AppListModel::data(const QModelIndex &index, int role) const {
         return QVariant();
     }
     auto elem = backing[index.row()];
-    if (role>RoleEnum::FDRPath){
+    if (role>=RoleEnum::FDRPath){
         return elem.getRole(static_cast<RoleEnum>(role));
     }
     return QVariant();
 }
 
-void AppListModel::activate(const int i) {
+void AppListModel::execute(const int i) {
     if(i < 0 || i >= backing.size()) {
         return;
     }
-    /*QString value = backing[i];
 
-    // Remove the value from the old location.
-    beginRemoveRows(QModelIndex(), i, i);
-    backing.erase(backing.begin() + i);
-    endRemoveRows();
+    backing[i].execute();
+}
 
-    // Add it to the top.
-    beginInsertRows(QModelIndex(), 0, 0);
-    backing.insert(0, value);
-    endInsertRows();*/
+void AppListModel::filter(const QString search){
+    beginResetModel();
+    backing.clear();
+
+    for (const auto& app: db){
+        if (app.match(search)){
+            backing << app;
+        }
+    }
+    endResetModel();
 }

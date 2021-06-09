@@ -2,6 +2,7 @@
 // https://github.com/albertlauncher/plugins
 
 
+#include <QString>
 #include <QFile>
 #include <iostream>
 #include <QTranslator>
@@ -21,9 +22,8 @@ bool useNonLocalizedName = false;
 bool useKeywords = false;
 QLocale loc;
 
-
-using namespace std;
-
+namespace FileDesktop{
+    using namespace std;
 /******************************************************************************/
 QString fieldCodesExpanded(const QString & exec, const QString & name, const QString & icon, const QString & de_path) {
     /*
@@ -110,7 +110,6 @@ QString getLocalizedKey(const QString &key, const map<QString,QString> &entries,
     return QString();
 }
 
-namespace FileDesktop{
     DesktopHash parseFile(QString path){
         DEBG << "Indexing desktop file:" << path.data_ptr();
 
@@ -141,7 +140,7 @@ namespace FileDesktop{
         return sectionMap;
     }
 
-    bool extractData(QString path, DesktopHash sectionMap, FileDesktopListModel* outModel){
+    bool extractData(QString path, DesktopHash sectionMap, FileDesktopListModel& outModel){
         map<QString,map<QString,QString>>::iterator sectionIterator;
 
         // Skip if there is no "Desktop Entry" section
@@ -181,7 +180,7 @@ namespace FileDesktop{
             }
         }
 */
-        bool term;
+        // bool term;
         QString name;
         QString nonLocalizedName;
         QString genericName;
@@ -207,8 +206,8 @@ namespace FileDesktop{
         icon = xdgStringEscape(getLocalizedKey("Icon", entryMap, loc));
 
         // Check if this is a terminal app
-        term = (entryIterator = entryMap.find("Terminal")) != entryMap.end()
-                && entryIterator->second=="true";
+        /*term = (entryIterator = entryMap.find("Terminal")) != entryMap.end()
+                && entryIterator->second=="true";*/
 
         // Try to get the localized genericName
         genericName = xdgStringEscape(getLocalizedKey("GenericName", entryMap, loc));
@@ -248,6 +247,8 @@ namespace FileDesktop{
         if (icon_path.isNull())
             icon_path = ":application-x-executable";
 
+
+
         // Description
         QString subtext;
         if (!comment.isEmpty())
@@ -258,7 +259,7 @@ namespace FileDesktop{
             subtext = nonLocalizedName;
         else
             subtext = commandLine;
-
+        /*
         // Set index strings
         vector<QString> indexStrings;
         indexStrings.emplace_back(name, UINT_MAX);
@@ -286,7 +287,12 @@ namespace FileDesktop{
         if (useNonLocalizedName && !nonLocalizedName.isEmpty())
             indexStrings.emplace_back(nonLocalizedName, UINT_MAX/2);
 
-        outModel->command = commandLine;
-        outModel->image = icon_path;
+        //*/
+
+        outModel.command = commandLine;
+        outModel.image = icon_path;
+        outModel.name = name;
+
+        return true;
     }
 }

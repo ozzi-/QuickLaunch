@@ -21,7 +21,7 @@ CoverBackground {
     Label {
         id: label
         anchors.centerIn: parent
-        text: qsTr("QuickSearch")
+        text: qsTr("QuickLauncher")
     }
 
     CoverActionList {
@@ -29,9 +29,7 @@ CoverBackground {
 
         CoverAction {
             iconSource: "image://theme/icon-cover-search"
-            onTriggered: _activatePage("SearchPage", function(p) {
-                p.reset()
-            })
+            onTriggered: _activatePage("SearchPage")
         }
 
     }

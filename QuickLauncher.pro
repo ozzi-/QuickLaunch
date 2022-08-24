@@ -14,13 +14,16 @@ TARGET = QuickLauncher
 
 CONFIG += sailfishapp
 
-SOURCES += src/QuickLauncher.cpp \
+SOURCES += \
+    src/app-list-filter-model.cpp \
     src/app-list-model.cpp \
     src/file-desktop/file-desktop.cpp \
-    src/file-desktop/parser.cpp
+    src/file-desktop/parser.cpp \
+    src/quick-launcher.cpp
 
 DISTFILES += qml/QuickLauncher.qml \
     qml/cover/CoverPage.qml \
+    qml/pages/About.qml \
     qml/pages/FirstPage.qml \
     qml/pages/SearchPage.qml \
     qml/pages/SecondPage.qml \
@@ -44,5 +47,6 @@ CONFIG += sailfishapp_i18n
 TRANSLATIONS += translations/QuickLauncher-de.ts
 
 HEADERS += src/app-list-model.h \
+    src/app-list-filter-model.h \
     src/file-desktop/file-desktop.h \
     src/file-desktop/parser.h

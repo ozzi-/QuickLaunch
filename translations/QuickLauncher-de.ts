@@ -2,9 +2,20 @@
 <!DOCTYPE TS>
 <TS version="2.1">
 <context>
+    <name>About</name>
+    <message>
+        <source>About QuickLauncher</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>Hello Sailors</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>CoverPage</name>
     <message>
-        <source>QuickSearch</source>
+        <source>QuickLauncher</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -26,7 +37,7 @@
 <context>
     <name>SearchPage</name>
     <message>
-        <source>Show Page 2</source>
+        <source>About Quick Launch</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

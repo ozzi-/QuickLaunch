@@ -29,6 +29,10 @@ namespace FileDesktop {
             case FDRIcon:
                 data = image;
             break;
+            case FDRId:
+                data = QString(appId);
+            case FDRSearch:
+                data = name;
             default:
                 data = "-- No identified --";
         }

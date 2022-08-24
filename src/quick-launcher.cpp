@@ -6,6 +6,7 @@
 #include <iostream>
 
 #include "app-list-model.h"
+#include "app-list-filter-model.h"
 
 
 int main(int argc, char *argv[])
@@ -21,10 +22,27 @@ int main(int argc, char *argv[])
     // To display the view, call "show()" (will show fullscreen on device).
 
     qmlRegisterType<AppListModel>("es.jaumesingla", 1, 0, "AppListModel");
+    qmlRegisterType<AppListFilterModel>("es.jaumesingla", 1, 0, "AppListFilterModel");
+
+    qmlRegisterSingletonType<AppListModel>("es.jaumesingla",
+                                                       1,
+                                                       0,
+                                                       "appDb",
+                                                       [](QQmlEngine *engine, QJSEngine *scriptEngine) -> QObject * {
+
+                Q_UNUSED(engine)
+                Q_UNUSED(scriptEngine)
+
+                auto db = new AppListModel;
+
+                return db;
+            });
 
     // return SailfishApp::main(argc, argv);
     QScopedPointer<QGuiApplication> app(SailfishApp::application(argc, argv));
     QScopedPointer<QQuickView> v(SailfishApp::createView());
+
+
 
     // Start the application.
     v->setSource(SailfishApp::pathTo("qml/QuickLauncher.qml"));

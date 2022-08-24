@@ -289,6 +289,9 @@ QString getLocalizedKey(const QString &key, const map<QString,QString> &entries,
 
         //*/
 
+        if (!icon_path.startsWith(QLatin1Char('/')))
+                icon_path.prepend(QStringLiteral("image://theme/"));
+
         outModel.command = commandLine;
         outModel.image = icon_path;
         outModel.name = name;

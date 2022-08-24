@@ -9,6 +9,8 @@ using namespace FileDesktop;
 class AppListModel : public QAbstractListModel
 {
     Q_OBJECT
+signals:
+    void changed();
 public:
     enum AppListRole {
         NameRole = Qt::UserRole + 1,
@@ -27,6 +29,7 @@ public:
 private:
     QVector<FileDesktopListModel> backing;
     QVector<FileDesktopListModel> db;
+
 };
 
 #endif // APP_LIST_MODEL

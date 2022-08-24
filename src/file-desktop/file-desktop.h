@@ -10,7 +10,11 @@ namespace FileDesktop {
         FDRPath = 1,
         FDRName = 2,
         FDRIcon = 3,
+        FDRId = 4,
+        FDRSearch= 5,
     };
+
+    // Q_ENUM(RoleEnum);
 
 
     class FileDesktopListModel {
@@ -19,10 +23,11 @@ namespace FileDesktop {
         QString command;
         QString name;
         QString image;
+        int appId;
         explicit FileDesktopListModel();
         explicit FileDesktopListModel(QString path);
         QVariant getRole(const RoleEnum role) const;
-        void execute() const;
+        Q_INVOKABLE void execute() const;
         bool match(const QString search) const;
     };
 }

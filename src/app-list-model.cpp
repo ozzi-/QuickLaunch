@@ -20,9 +20,12 @@ AppListModel::AppListModel(QObject *parent) :
         while (listDir.hasNext()){
             QString path = listDir.next();
             auto fd = FileDesktopListModel(path);
-            auto hash = parseFile(path);
-            extractData(path, hash, fd);
-            db << fd;
+            auto dataMapped = parseFile(path);
+            extractData(path, dataMapped, fd);
+            if (fd.name.length()>0){
+                fd.appId = db.length()-1;
+                db << fd;
+            }
             // Use this: https://github.com/albertlauncher/plugins/blob/b4cac28be7b265027b00279baba14086d97c4d07/applications/src/extension.cpp to parse the files .Desktop
         }
     }
@@ -34,6 +37,8 @@ QHash<int, QByteArray> AppListModel::roleNames() const {
     roles[FDRPath] = "path";
     roles[FDRName] = "name";
     roles[FDRIcon] = "icon";
+    roles[FDRId] = "appId";
+    roles[FDRSearch] = "search";
     return roles;
 }
 
@@ -42,6 +47,9 @@ QVariant AppListModel::data(const QModelIndex &index, int role) const {
         return QVariant();
     }
     auto elem = backing[index.row()];
+    if (role == RoleEnum::FDRId){
+        return QVariant(index);
+    }
     if (role>=RoleEnum::FDRPath){
         return elem.getRole(static_cast<RoleEnum>(role));
     }

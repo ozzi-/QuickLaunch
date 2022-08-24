@@ -6,122 +6,114 @@ import es.jaumesingla 1.0
 Page {
     id: searchPage
     property string searchString
-    // property Timer delayTimer
-
-    onSearchStringChanged: delayTimer.restart()
-
-    function filterDelayed(){
-        /*if (!delayTimer){
-            delayTimer = new Timer()
-            delayTimer.interval = 3000
-            delayTimer.repeat = false
-            delayTimer.triggered.connect(function (){
-                dModel.filter(searchString)
-            })
-        }*/
-
-        delayTimer.restart()
-    }
-
-
-    Timer {
-        id: delayTimer
-        interval: 1000
-        repeat: false
-        onTriggered: dmodel.filter(searchString)
-    }
-
-
-    function reset() {
-            //% "Search results will be shown here"
-            // viewPlaceholder.text = qsTrId("orn-searchpage-placeholder-default")
-            //% "Type some keywords in the field above"
-            // viewPlaceholder.hintText = qsTrId("orn-searchpage-placeholder-default-hint")
-            view.headerContainer.searchField.forceActiveFocus()
-    }
 
     onStatusChanged: {
         if (status === PageStatus.Active){
-            view.headerContainer.searchField.forceActiveFocus()
+            searchField.forceActiveFocus()
         }
     }
 
-    Column {
-        id: headerContainer
-
-        width: searchPage.width
-
-        PageHeader {
-            title: "Applications"
-        }
-
-        SearchField {
-            id: searchField
-            width: parent.width
-
-            Binding {
-                target: searchPage
-                property: "searchString"
-                value: searchField.text.toLowerCase().trim()
-            }
-        }
-    }
-
-    SilicaListView {
-        id: view
-
+    SilicaFlickable {
         anchors.fill: parent
-
-        model: AppListModel {
-            id: dmodel
-        }
 
         PullDownMenu {
             MenuItem {
-                text: qsTr("Show Page 2")
-                onClicked: pageStack.push(Qt.resolvedUrl("SecondPage.qml"))
+                text: qsTr("About Quick Launch")
+                onClicked: pageStack.push(Qt.resolvedUrl("About.qml"))
             }
         }
 
+        Column {
+            id: headerContainer
 
-        header: Item {
-            id: header
-            width: headerContainer.width
-            height: headerContainer.height
-            Component.onCompleted: headerContainer.parent = header
+            width: searchPage.width
+
+            PageHeader {
+                title: "Applications"
+            }
+
+            SearchField {
+                id: searchField
+                width: parent.width
+
+               onTextChanged: filterModel.setFilterFixedString(text)
+               // onFocusChanged: console.log(event)
+            }
         }
 
-        delegate: ListItem {
+        SilicaListView {
+            id: view
 
-            Image {
-                id: appIcon
-                anchors {
-                    left: parent.left
-                    verticalCenter: parent.verticalCenter
-                }
-                width: Theme.iconSizeLauncher
-                height: Theme.iconSizeLauncher
-                fillMode: Image.PreserveAspectFit
-                source: icon
-            }
-            Item {
-                anchors {
-                    left: appIcon.right
-                    leftMargin: Theme.paddingMedium
-                    right: parent.right
-                    rightMargin: Theme.paddingMedium
-                    verticalCenter: parent.verticalCenter
-                }
+            anchors.fill: parent
 
-                Label {
-                    // x: appIcon.right
+            model: AppListFilterModel {
+                id: filterModel
 
-                    text: name
-
+                sourceModel: AppListModel{
+                    id: appDb
                 }
             }
 
-            onClicked: dmodel.execute(index)
+
+            header: Item {
+                id: header
+                width: headerContainer.width
+                height: headerContainer.height
+                Component.onCompleted: headerContainer.parent = header
+            }
+
+            delegate: ListItem {
+                id: delegate
+
+                width: parent.width
+                contentHeight: Theme.itemSizeLarge
+
+                onClicked: filterModel.execute(appId)
+
+                Row {
+                    width: parent.width - 2 * x
+                    x: Theme.horizontalPageMargin
+                    height: parent.height
+                    anchors.verticalCenter: parent.verticalCenter
+                    Image {
+                        id: appIcon
+
+                        height: parent.height - 2 * Theme.paddingSmall
+                        width: parent.height - 2 * Theme.paddingSmall
+                        anchors.verticalCenter: parent.verticalCenter
+
+                        source: icon
+                    }
+                    Item {
+                        id: spacer
+
+                        width:Theme.paddingMedium
+                        height:1
+
+                    }
+                    Column{
+                        id: data
+
+                        width: parent.width - appIcon.width
+
+                        anchors.verticalCenter: appIcon.verticalCenter
+
+                        Label{
+                            id: text
+                            width: parent.width
+                            elide: Text.ElideRight
+                            text: name
+                            color: pressed ? Theme.secondaryHighlightColor:Theme.highlightColor
+                            font.pixelSize: Theme.fontSizeMedium
+                        }
+                        Label{
+                            text: "packageName"
+                            color: Theme.secondaryColor
+                            font.pixelSize: Theme.fontSizeSmall
+                        }
+                    }
+                }
+            }
         }
     }
 

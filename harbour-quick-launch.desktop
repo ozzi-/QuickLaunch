@@ -1,9 +1,9 @@
 [Desktop Entry]
 Type=Application
 X-Nemo-Application-Type=silica-qt5
-Icon=QuickLauncher
-Exec=QuickLauncher
-Name=QuickLauncher
+Icon=harbour-quick-launch
+Exec=harbour-quick-launch
+Name=QuickLaunch
 # translation example:
 # your app name in German locale (de)
 #

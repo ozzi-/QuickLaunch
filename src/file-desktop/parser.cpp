@@ -24,94 +24,95 @@ QLocale loc;
 
 namespace FileDesktop{
     using namespace std;
-/******************************************************************************/
-QString fieldCodesExpanded(const QString & exec, const QString & name, const QString & icon, const QString & de_path) {
-    /*
-     * https://specifications.freedesktop.org/desktop-entry-spec/1.5/ar01s07.html
-     *
-     * Code	Description
-     * %% : '%'
-     * %f : A single file name (including the path), even if multiple files are selected. The system reading the desktop entry should recognize that the program in question cannot handle multiple file arguments, and it should should probably spawn and execute multiple copies of a program for each selected file if the program is not able to handle additional file arguments. If files are not on the local file system (i.e. are on HTTP or FTP locations), the files will be copied to the local file system and %f will be expanded to point at the temporary file. Used for programs that do not understand the URL syntax.
-     * %F : A list of files. Use for apps that can open several local files at once. Each file is passed as a separate argument to the executable program.
-     * %u : A single URL. Local files may either be passed as file: URLs or as file path.
-     * %U : A list of URLs. Each URL is passed as a separate argument to the executable program. Local files may either be passed as file: URLs or as file path.
-     * %i : The Icon key of the desktop entry expanded as two arguments, first --icon and then the value of the Icon key. Should not expand to any arguments if the Icon key is empty or missing.
-     * %c : The translated name of the application as listed in the appropriate Name key in the desktop entry.
-     * %k : The location of the desktop file as either a URI (if for example gotten from the vfolder system) or a local filename or empty if no location is known.
-     * Deprecated: %v %m %d %D %n %N
-     */
-    QString commandLine;
-    for (auto it = exec.cbegin(); it != exec.end(); ++it) {
-        if (*it == '%'){
-            ++it;
-            if (it == exec.end()) {
-                break;
-            } else if (*it=='%') {
-                commandLine.push_back("%");
-            } else if (*it=='f') {  // Unhandled atm
-            } else if (*it=='F') {  // Unhandled atm
-            } else if (*it=='u') {  // Unhandled atm
-            } else if (*it=='U') {  // Unhandled atm
-            } else if (*it=='i' && !icon.isNull()) {
-                commandLine.push_back(QString("--icon %1").arg(icon));
-            } else if (*it=='c') {
-                commandLine.push_back(name);
-            } else if (*it=='k') {
-                commandLine.push_back(de_path);
-            } else if (*it=='v' || *it=='m' || *it=='d' || *it=='D' || *it=='n' || *it=='N') { /*Skipping deprecated field codes*/
-            } else {
-                qWarning() << "Ignoring invalid field code: " << *it;
-            }
-        } else
-            commandLine.push_back(*it);
-    }
-    return commandLine;
-}
-/******************************************************************************/
-QString xdgStringEscape(const QString & unescaped) {
-    /*
-     * The escape sequences \s, \n, \t, \r, and \\ are supported for values of
-     * type string and localestring, meaning ASCII space, newline, tab, carriage
-     * return, and backslash, respectively.
-     *
-     * http://standards.freedesktop.org/desktop-entry-spec/latest/ar01s03.html
-     */
-    QString result;
-    QString::const_iterator it = unescaped.begin();
-    while (it != unescaped.end()) {
-        if (*it == '\\'){
-            ++it;
-            if (it == unescaped.end())
-                break;
-            else if (*it=='s')
-                result.append(' ');
-            else if (*it=='n')
-                result.append('\n');
-            else if (*it=='t')
-                result.append('\t');
-            else if (*it=='r')
-                result.append('\r');
-            else if (*it=='\\')
-                result.append('\\');
-        }
-        else
-            result.append(*it);
-        ++it;
-    }
-    return result;
-}
 
-QString getLocalizedKey(const QString &key, const map<QString,QString> &entries, const QLocale &loc) {
-    map<QString,QString>::const_iterator it;
-    if ( (it = entries.find(QString("%1[%2]").arg(key, loc.name()))) != entries.end()
-         || (it = entries.find(QString("%1[%2]").arg(key, loc.name().left(2)))) != entries.end()
-         || (it = entries.find(key)) != entries.end())
-        return it->second;
-    return QString();
-}
+    /******************************************************************************/
+    QString fieldCodesExpanded(const QString & exec, const QString & name, const QString & icon, const QString & de_path) {
+        /*
+        * https://specifications.freedesktop.org/desktop-entry-spec/1.5/ar01s07.html
+        *
+        * Code	Description
+        * %% : '%'
+        * %f : A single file name (including the path), even if multiple files are selected. The system reading the desktop entry should recognize that the program in question cannot handle multiple file arguments, and it should should probably spawn and execute multiple copies of a program for each selected file if the program is not able to handle additional file arguments. If files are not on the local file system (i.e. are on HTTP or FTP locations), the files will be copied to the local file system and %f will be expanded to point at the temporary file. Used for programs that do not understand the URL syntax.
+        * %F : A list of files. Use for apps that can open several local files at once. Each file is passed as a separate argument to the executable program.
+        * %u : A single URL. Local files may either be passed as file: URLs or as file path.
+        * %U : A list of URLs. Each URL is passed as a separate argument to the executable program. Local files may either be passed as file: URLs or as file path.
+        * %i : The Icon key of the desktop entry expanded as two arguments, first --icon and then the value of the Icon key. Should not expand to any arguments if the Icon key is empty or missing.
+        * %c : The translated name of the application as listed in the appropriate Name key in the desktop entry.
+        * %k : The location of the desktop file as either a URI (if for example gotten from the vfolder system) or a local filename or empty if no location is known.
+        * Deprecated: %v %m %d %D %n %N
+        */
+        QString commandLine;
+        for (auto it = exec.cbegin(); it != exec.end(); ++it) {
+            if (*it == '%'){
+                ++it;
+                if (it == exec.end()) {
+                    break;
+                } else if (*it=='%') {
+                    commandLine.push_back("%");
+                } else if (*it=='f') {  // Unhandled atm
+                } else if (*it=='F') {  // Unhandled atm
+                } else if (*it=='u') {  // Unhandled atm
+                } else if (*it=='U') {  // Unhandled atm
+                } else if (*it=='i' && !icon.isNull()) {
+                    commandLine.push_back(QString("--icon %1").arg(icon));
+                } else if (*it=='c') {
+                    commandLine.push_back(name);
+                } else if (*it=='k') {
+                    commandLine.push_back(de_path);
+                } else if (*it=='v' || *it=='m' || *it=='d' || *it=='D' || *it=='n' || *it=='N') { /*Skipping deprecated field codes*/
+                } else {
+                    qWarning() << "Ignoring invalid field code: " << *it;
+                }
+            } else
+                commandLine.push_back(*it);
+        }
+        return commandLine;
+    }
+    /******************************************************************************/
+    QString xdgStringEscape(const QString & unescaped) {
+        /*
+        * The escape sequences \s, \n, \t, \r, and \\ are supported for values of
+        * type string and localestring, meaning ASCII space, newline, tab, carriage
+        * return, and backslash, respectively.
+        *
+        * http://standards.freedesktop.org/desktop-entry-spec/latest/ar01s03.html
+        */
+        QString result;
+        QString::const_iterator it = unescaped.begin();
+        while (it != unescaped.end()) {
+            if (*it == '\\'){
+                ++it;
+                if (it == unescaped.end())
+                    break;
+                else if (*it=='s')
+                    result.append(' ');
+                else if (*it=='n')
+                    result.append('\n');
+                else if (*it=='t')
+                    result.append('\t');
+                else if (*it=='r')
+                    result.append('\r');
+                else if (*it=='\\')
+                    result.append('\\');
+            }
+            else
+                result.append(*it);
+            ++it;
+        }
+        return result;
+    }
+
+    QString getLocalizedKey(const QString &key, const map<QString,QString> &entries, const QLocale &loc) {
+        map<QString,QString>::const_iterator it;
+        if ( (it = entries.find(QString("%1[%2]").arg(key, loc.name()))) != entries.end()
+            || (it = entries.find(QString("%1[%2]").arg(key, loc.name().left(2)))) != entries.end()
+            || (it = entries.find(key)) != entries.end())
+            return it->second;
+        return QString();
+    }
 
     DesktopHash parseFile(QString path){
-        DEBG << "Indexing desktop file:" << path.data_ptr();
+        DEBG << "Indexing desktop file:" << path.toStdString() << std::endl;
 
         DesktopHash sectionMap;
 
@@ -239,6 +240,8 @@ QString getLocalizedKey(const QString &key, const map<QString,QString> &entries,
          * Build the item
          */
 
+        std::cout << exec.toStdString() << std::endl;
+
         // Field code expandesd commandline
         QString commandLine = fieldCodesExpanded(exec, name, icon, path);
 
@@ -247,6 +250,8 @@ QString getLocalizedKey(const QString &key, const map<QString,QString> &entries,
         if (icon_path.isNull())
             icon_path = ":application-x-executable";
 
+        if (!icon_path.startsWith(QLatin1Char('/')))
+                icon_path.prepend(QStringLiteral("image://theme/"));
 
 
         // Description
@@ -259,38 +264,6 @@ QString getLocalizedKey(const QString &key, const map<QString,QString> &entries,
             subtext = nonLocalizedName;
         else
             subtext = commandLine;
-        /*
-        // Set index strings
-        vector<QString> indexStrings;
-        indexStrings.emplace_back(name, UINT_MAX);
-
-        QStringList excludes = {
-            "java ",
-            "ruby ",
-            "python ",
-            "perl ",
-            "bash ",
-            "sh ",
-            "dbus-send ",
-            "/"
-        };
-        if (none_of(excludes.begin(), excludes.end(), [&exec](const QString &str){ return exec.startsWith(str); }))
-            indexStrings.emplace_back(exec.section(QChar(QChar::Space), 0, 0, QString::SectionSkipEmpty), UINT_MAX);
-
-        if (useKeywords)
-            for (auto & kw : keywords)
-                indexStrings.emplace_back(kw, UINT_MAX/2);
-
-        if (useGenericName && !genericName.isEmpty())
-            indexStrings.emplace_back(genericName, UINT_MAX/2);
-
-        if (useNonLocalizedName && !nonLocalizedName.isEmpty())
-            indexStrings.emplace_back(nonLocalizedName, UINT_MAX/2);
-
-        //*/
-
-        if (!icon_path.startsWith(QLatin1Char('/')))
-                icon_path.prepend(QStringLiteral("image://theme/"));
 
         outModel.command = commandLine;
         outModel.image = icon_path;

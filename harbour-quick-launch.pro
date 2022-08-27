@@ -9,8 +9,12 @@
 #   - icon definition filename in desktop file must be changed
 #   - translation filenames have to be changed
 
+# Version
+VERSION = 0.7.5
+DEFINES += APP_VERSION=\\\"$$VERSION\\\"
+
 # The name of your application
-TARGET = QuickLauncher
+TARGET = harbour-quick-launch
 
 CONFIG += sailfishapp
 
@@ -27,12 +31,12 @@ DISTFILES += qml/QuickLauncher.qml \
     qml/pages/FirstPage.qml \
     qml/pages/SearchPage.qml \
     qml/pages/SecondPage.qml \
-    rpm/QuickLauncher.changes.in \
-    rpm/QuickLauncher.changes.run.in \
-    rpm/QuickLauncher.spec \
-    rpm/QuickLauncher.yaml \
+    rpm/harbour-quick-launch.changes.in \
+    rpm/harbour-quick-launch.changes.run.in \
+    rpm/harbour-quick-launch.spec \
+    rpm/harbour-quick-launch.yaml \
     translations/*.ts \
-    QuickLauncher.desktop
+    harbour-quick-launch.desktop
 
 SAILFISHAPP_ICONS = 86x86 108x108 128x128 172x172
 
@@ -44,9 +48,12 @@ CONFIG += sailfishapp_i18n
 # planning to localize your app, remember to comment out the
 # following TRANSLATIONS line. And also do not forget to
 # modify the localized app name in the the .desktop file.
-TRANSLATIONS += translations/QuickLauncher-de.ts
+TRANSLATIONS += translations/harbour-quick-launch-de.ts
 
 HEADERS += src/app-list-model.h \
     src/app-list-filter-model.h \
     src/file-desktop/file-desktop.h \
     src/file-desktop/parser.h
+
+RESOURCES += \
+    resources.qrc

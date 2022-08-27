@@ -11,7 +11,7 @@ namespace FileDesktop {
         FDRName = 2,
         FDRIcon = 3,
         FDRId = 4,
-        FDRSearch= 5,
+        FDRCommand = 5,
     };
 
     // Q_ENUM(RoleEnum);
@@ -23,6 +23,7 @@ namespace FileDesktop {
         QString command;
         QString name;
         QString image;
+        QString appType;
         int appId;
         explicit FileDesktopListModel();
         explicit FileDesktopListModel(QString path);

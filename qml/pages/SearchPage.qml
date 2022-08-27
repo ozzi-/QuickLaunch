@@ -37,7 +37,6 @@ Page {
                 width: parent.width
 
                onTextChanged: filterModel.setFilterFixedString(text)
-               // onFocusChanged: console.log(event)
             }
         }
 
@@ -54,6 +53,7 @@ Page {
                 }
             }
 
+            currentIndex: -1
 
             header: Item {
                 id: header
@@ -107,7 +107,7 @@ Page {
                             font.pixelSize: Theme.fontSizeMedium
                         }
                         Label{
-                            text: "packageName"
+                            text: command
                             color: Theme.secondaryColor
                             font.pixelSize: Theme.fontSizeSmall
                         }

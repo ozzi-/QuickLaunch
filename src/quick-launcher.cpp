@@ -21,6 +21,8 @@ int main(int argc, char *argv[])
     //
     // To display the view, call "show()" (will show fullscreen on device).
 
+    QCoreApplication::setApplicationVersion(APP_VERSION);
+
     qmlRegisterType<AppListModel>("es.jaumesingla", 1, 0, "AppListModel");
     qmlRegisterType<AppListFilterModel>("es.jaumesingla", 1, 0, "AppListFilterModel");
 

@@ -18,16 +18,14 @@ public:
 
     explicit AppListModel(QObject *parent = 0);
 
-    virtual int rowCount(const QModelIndex&) const { return backing.size(); }
+    virtual int rowCount(const QModelIndex&) const { return db.size(); }
     virtual QVariant data(const QModelIndex &index, int role) const;
 
     QHash<int, QByteArray> roleNames() const;
 
     Q_INVOKABLE void execute(const int i);
-    Q_INVOKABLE void filter(const QString search);
 
 private:
-    QVector<FileDesktopListModel> backing;
     QVector<FileDesktopListModel> db;
 
 };

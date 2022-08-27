@@ -4,11 +4,15 @@
 <context>
     <name>About</name>
     <message>
-        <source>About QuickLauncher</source>
+        <source>QuickLauncher is an application search and launcher</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <source>Hello Sailors</source>
+        <source>Sources</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <source>About</source>
         <translation type="unfinished"></translation>
     </message>
 </context>
@@ -45,11 +49,11 @@
     <name>SecondPage</name>
     <message>
         <source>Nested Page</source>
-        <translation type="unfinished"></translation>
+        <translation>Unterseite</translation>
     </message>
     <message>
         <source>Item</source>
-        <translation type="unfinished"></translation>
+        <translation>Element</translation>
     </message>
 </context>
 </TS>

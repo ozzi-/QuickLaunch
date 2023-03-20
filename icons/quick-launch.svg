@@ -13,6 +13,9 @@
    id="svg193"
    sodipodi:docname="quick-launch.svg"
    inkscape:version="1.2.1 (9c6d41e4, 2022-07-14)"
+   inkscape:export-filename="quick-launch.png"
+   inkscape:export-xdpi="142.88373"
+   inkscape:export-ydpi="142.88373"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:xlink="http://www.w3.org/1999/xlink"
@@ -50,8 +53,8 @@
    inkscape:deskcolor="#d1d1d1"
    showgrid="false"
    inkscape:zoom="11.94186"
-   inkscape:cx="26.377799"
-   inkscape:cy="43.376826"
+   inkscape:cx="26.461539"
+   inkscape:cy="43.460566"
    inkscape:window-width="2195"
    inkscape:window-height="1334"
    inkscape:window-x="2240"
@@ -109,5 +112,5 @@
    transform="matrix(2.4886117,0,0,2.8083539,-76.100475,-56.92167)"><tspan
      x="48.820312"
      y="34.311245"
-     id="tspan7646">A</tspan></text></g>
+     id="tspan342">A</tspan></text></g>
 </svg>

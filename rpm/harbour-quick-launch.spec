@@ -12,7 +12,7 @@ Summary:    Quick Launcher Applications
 Version:    0.1
 Release:    1
 Group:      Qt/Qt
-License:    LICENSE
+License:    GPL-3.0
 URL:        http://example.org/
 Source0:    %{name}-%{version}.tar.bz2
 Source100:  harbour-quick-launch.yaml

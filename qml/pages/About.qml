@@ -40,7 +40,7 @@ Page {
                 font.pixelSize: Theme.fontSizeExtraLarge
                 color: Theme.secondaryHighlightColor
 
-                text: "QuickLauncher"
+                text: "QuickLaunch"
             }
 
             Label {
@@ -60,7 +60,7 @@ Page {
                wrapMode: Text.WordWrap
                font.pixelSize: Theme.fontSizeSmall
 
-               text: qsTr("QuickLauncher is an application search and launcher")
+               text: qsTr("QuickLaunch is an application search and launcher")
            }
 
            SectionHeader{

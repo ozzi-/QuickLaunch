@@ -21,7 +21,7 @@ CoverBackground {
     Label {
         id: label
         anchors.centerIn: parent
-        text: qsTr("QuickLauncher")
+        text: qsTr("QuickLaunch")
     }
 
     CoverActionList {

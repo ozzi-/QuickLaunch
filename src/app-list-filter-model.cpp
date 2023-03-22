@@ -10,6 +10,7 @@ AppListFilterModel::AppListFilterModel(QObject *parent) :
 {
     setSortRole(FDRName);
     setFilterRole(FDRName);
+    setFilterCaseSensitivity(Qt::CaseSensitivity::CaseInsensitive);
 }
 
 void AppListFilterModel::sortModel()

@@ -8,12 +8,12 @@ Name:       harbour-quick-launch
 # >> macros
 # << macros
 
-Summary:    Quick Launcher Applications
+Summary:    Quick Launch Applications
 Version:    0.1
 Release:    1
 Group:      Qt/Qt
 License:    GPLv3
-URL:        http://example.org/
+URL:        https://gitlab.com/dracks/quicklaunchslx
 Source0:    %{name}-%{version}.tar.bz2
 Source100:  harbour-quick-launch.yaml
 Requires:   sailfishsilica-qt5 >= 0.10.9
@@ -24,8 +24,28 @@ BuildRequires:  pkgconfig(Qt5Quick)
 BuildRequires:  desktop-file-utils
 
 %description
-Short description of my Sailfish OS Application
+Quick Launch is an application to search in your current installed applications and launch them
 
+# This description section includes metadata for SailfishOS:Chum, see
+# https://github.com/sailfishos-chum/main/blob/main/Metadata.md
+%if 0%{?_chum}
+PackageName: Quick Launch
+Type: desktop-application
+DeveloperName: Jaume Singla
+Categories:
+ - Utility
+Custom:
+  Repo: https://gitlab.com/dracks/quicklaunchslx
+Icon: https://gitlab.com/dracks/quicklaunchslx/-/raw/master/icons/quick-launch.svg
+Screenshots:
+ - https://gitlab.com/dracks/quicklaunchslx/-/raw/master/screenshots/all.png
+ - https://gitlab.com/dracks/quicklaunchslx/-/raw/master/screenshots/one.png
+ - https://gitlab.com/dracks/quicklaunchslx/-/raw/master/screenshots/about.png
+ - https://gitlab.com/dracks/quicklaunchslx/-/raw/master/screenshots/two.png
+Url:
+  Homepage: https://gitlab.com/dracks/quicklaunchslx
+  Bugtracker: https://gitlab.com/dracks/quicklaunchslx/issues
+%endif
 
 %prep
 %setup -q -n %{name}-%{version}

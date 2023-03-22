@@ -4,7 +4,7 @@
 <context>
     <name>About</name>
     <message>
-        <source>QuickLauncher is an application search and launcher</source>
+        <source>QuickLaunch is an application search and launcher</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -19,7 +19,7 @@
 <context>
     <name>CoverPage</name>
     <message>
-        <source>QuickLauncher</source>
+        <source>QuickLaunch</source>
         <translation type="unfinished"></translation>
     </message>
 </context>

@@ -17,6 +17,7 @@ DEFINES += APP_VERSION=\\\"$$VERSION\\\"
 TARGET = harbour-quick-launch
 
 CONFIG += sailfishapp
+QT += core-private
 
 SOURCES += \
     src/app-list-filter-model.cpp \
@@ -28,9 +29,8 @@ SOURCES += \
 DISTFILES += qml/QuickLauncher.qml \
     qml/cover/CoverPage.qml \
     qml/pages/About.qml \
-    qml/pages/FirstPage.qml \
+    qml/pages/LaunchPage.qml \
     qml/pages/SearchPage.qml \
-    qml/pages/SecondPage.qml \
     rpm/harbour-quick-launch.changes.in \
     rpm/harbour-quick-launch.changes.run.in \
     rpm/harbour-quick-launch.spec \

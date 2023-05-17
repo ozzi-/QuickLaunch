@@ -7,6 +7,7 @@
 
 namespace FileDesktop {
     FileDesktopListModel::FileDesktopListModel(){
+
         path="";
         command="";
         image="";

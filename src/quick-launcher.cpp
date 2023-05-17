@@ -10,7 +10,7 @@
 
 #include "app-list-model.h"
 #include "app-list-filter-model.h"
-
+#include "file-desktop/file-desktop.h"
 
 int main(int argc, char *argv[])
 {
@@ -27,6 +27,7 @@ int main(int argc, char *argv[])
     QCoreApplication::setApplicationVersion(APP_VERSION);
 
     qmlRegisterType<AppListModel>("es.jaumesingla", 1, 0, "AppListModel");
+    // qmlRegisterType<FileDesktop::FileDesktopListModel>("es.jaumesingla", 1, 0, "FileDesktopModel");
     qmlRegisterType<AppListFilterModel>("es.jaumesingla", 1, 0, "AppListFilterModel");
 
     qmlRegisterSingletonType<AppListModel>("es.jaumesingla",

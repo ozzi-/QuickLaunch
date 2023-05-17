@@ -9,8 +9,8 @@ Name:       harbour-quick-launch
 # << macros
 
 Summary:    Quick Launch Applications
-Version:    0.1
-Release:    1
+Version:    1.0
+Release:    2
 Group:      Qt/Qt
 License:    GPLv3
 URL:        https://gitlab.com/dracks/quicklaunchslx
@@ -25,6 +25,11 @@ BuildRequires:  desktop-file-utils
 
 %description
 Quick Launch is an application to search in your current installed applications and launch them
+
+V1.0
+- Sending the app to background when launching an app
+- Change the way to execute apps, using the internal stuff from nemomobile.lipstick
+- Improvement on the focus of the Search field
 
 # This description section includes metadata for SailfishOS:Chum, see
 # https://github.com/sailfishos-chum/main/blob/main/Metadata.md

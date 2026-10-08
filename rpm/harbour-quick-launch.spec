@@ -9,8 +9,8 @@ Name:       harbour-quick-launch
 # << macros
 
 Summary:    Quick Launch Applications
-Version:    1.0
-Release:    2
+Version:    1.1.0
+Release:    1
 Group:      Qt/Qt
 License:    GPLv3
 URL:        https://gitlab.com/dracks/quicklaunchslx
@@ -62,8 +62,8 @@ Url:
 # >> build pre
 # << build pre
 
-%qmake5 
-
+cd %{_builddir}/%{name}-%{version}
+qmake harbour-quick-launch.pro
 make %{?_smp_mflags}
 
 # >> build post
@@ -71,9 +71,10 @@ make %{?_smp_mflags}
 
 %install
 rm -rf %{buildroot}
+cd %{_builddir}/%{name}-%{version}
 # >> install pre
 # << install pre
-%qmake5_install
+make INSTALL_ROOT=%{buildroot} install
 
 # >> install post
 # << install post

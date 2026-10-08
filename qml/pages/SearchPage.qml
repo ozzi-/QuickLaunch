@@ -105,6 +105,8 @@ Page {
                 onClicked: function (){
                     // filterModel.execute(appId);
                     launcher.launchApplication()
+                    // Reset to the original state: empty search, full list
+                    searchField.text = ""
                     __silica_applicationwindow_instance.deactivate()
                     timeout.restart()
                     // timeout.start()

@@ -20,6 +20,21 @@ Page {
         onTriggered: activateFocus()
     }
 
+    // On first open the page reports PageStatus.Active before the window is
+    // fully visible, so forceActiveFocus() silently fails. Retry briefly
+    // until the field really has focus, so the user can type right away.
+    Timer {
+        id: initialFocus
+        interval: 200
+        running: searchPage.status === PageStatus.Active && !searchField.activeFocus
+        repeat: true
+        onTriggered: {
+            searchField.forceActiveFocus()
+            if (searchField.activeFocus)
+                stop()
+        }
+    }
+
     onStatusChanged: {
         console.log(status)
         if (status === PageStatus.Active){

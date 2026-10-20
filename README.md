@@ -1,1 +1,1 @@
-Adding some improvements to QuickShare
+Adding some improvements to QuickLaunch

@@ -63,8 +63,48 @@ Page {
                text: qsTr("QuickLaunch is an application search and launcher")
            }
 
+           Label {
+               x : Theme.horizontalPageMargin
+               width: parent.width - 2*x
+               wrapMode: Text.WordWrap
+               font.pixelSize: Theme.fontSizeSmall
+
+               text: qsTr("Fork by ozzi with extra features.")
+           }
+
            SectionHeader{
                text: qsTr("Sources")
+           }
+
+           BackgroundItem{
+               width: parent.width
+               height: Theme.itemSizeMedium
+               Row{
+                   x : Theme.horizontalPageMargin
+                   width: parent.width - 2*x
+                   height: parent.height
+                   spacing:Theme.paddingMedium
+
+                   Image {
+                       width: parent.height
+                       height: width
+                       fillMode: Image.PreserveAspectFit
+                       anchors.verticalCenter: parent.verticalCenter
+                       source: "qrc:///icons/git"
+                   }
+
+                   Label{
+                       width: parent.width - parent.height - parent.spacing
+                       anchors.verticalCenter: parent.verticalCenter
+                       wrapMode: Text.WrapAnywhere
+                       font.pixelSize: Theme.fontSizeSmall
+
+                       text: "https://github.com/ozzi-/QuickLaunch/"
+                       color: parent.parent.pressed ? Theme.highlightColor : Theme.primaryColor
+
+                   }
+               }
+               onClicked: Qt.openUrlExternally("https://github.com/ozzi-/QuickLaunch/")
            }
 
            BackgroundItem{

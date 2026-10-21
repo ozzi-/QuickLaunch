@@ -9,8 +9,8 @@ Name:       harbour-quick-launch
 # << macros
 
 Summary:    Quick Launch Applications
-Version:    1.1.0
-Release:    4
+Version:    1.2.0
+Release:    1
 Group:      Qt/Qt
 License:    GPLv3
 URL:        https://gitlab.com/dracks/quicklaunchslx

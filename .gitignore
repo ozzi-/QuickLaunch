@@ -1,1 +1,2 @@
-harbour-quick-launch.pro.user
+dist/
+*.user

@@ -46,7 +46,6 @@ Page {
                 }
             }
         }
-        onStopped: ticks = 0
     }
 
     onStatusChanged: {

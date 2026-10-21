@@ -21,18 +21,32 @@ Page {
     }
 
     // On first open the page reports PageStatus.Active before the window is
-    // fully visible, so forceActiveFocus() silently fails. Retry briefly
-    // until the field really has focus, so the user can type right away.
+    // fully visible, so forceActiveFocus() silently fails. Retry on a fixed
+    // schedule (checking each tick) until the field really has focus, so the
+    // user can type right away.
+    property bool focusLocked: false
     Timer {
         id: initialFocus
+        property int ticks: 0
         interval: 200
-        running: searchPage.status === PageStatus.Active && !searchField.activeFocus
+        running: searchPage.status === PageStatus.Active && !searchPage.focusLocked
         repeat: true
         onTriggered: {
-            searchField.forceActiveFocus()
-            if (searchField.activeFocus)
+            if (searchPage.focusLocked)
                 stop()
+            searchField.forceActiveFocus()
+            if (searchField.activeFocus) {
+                searchPage.focusLocked = true
+                stop()
+            } else {
+                ticks++
+                if (ticks >= 15) {   // give up after ~3 s; the user can tap the field
+                    searchPage.focusLocked = true
+                    stop()
+                }
+            }
         }
+        onStopped: ticks = 0
     }
 
     onStatusChanged: {

@@ -25,7 +25,7 @@ was missing day to day:
   so you can start typing immediately without tapping it.
 - **Clean state after launching** — launching an app resets the search field,
   so when you come back to QuickLaunch you always see the full list.
-- **App-type filter (All / Sailfish / Android)** — a toggle above the list
+- **App-type filter (All / Native / Android)** — a toggle above the list
   filters by app type. Android apps are detected by their `apkd-launcher` exec
   prefix; everything else is treated as native Sailfish. The filter applies
   to both the full list and search results.

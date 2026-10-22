@@ -100,6 +100,21 @@ Page {
                    filterModel.setFilterFixedString(text)
                }
             }
+
+            SilicaSegmentedControl {
+                id: typeFilter
+
+                width: parent.width
+                currentSegment: filterModel.filterMode
+
+                onClicked: {
+                    filterModel.filterMode = index
+                }
+
+                Segment { text: qsTr("All") }
+                Segment { text: qsTr("Sailfish") }
+                Segment { text: qsTr("Android") }
+            }
         }
 
         SilicaListView {

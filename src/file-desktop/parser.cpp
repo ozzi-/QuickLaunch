@@ -269,6 +269,23 @@ namespace FileDesktop{
         outModel.image = icon_path;
         outModel.name = name;
 
+        // Classify a native Sailfish app vs an Android app. On Sailfish OS
+        // Android apps launch through the app runner and their desktop entries
+        // reference the Android package / intent / component, while native apps
+        // point at a real executable. Centralised here so the heuristic is easy
+        // to tune once we inspect real .desktop files on the phone.
+        QString appType = QLatin1String("sailfish");
+        const QString lowerExec = exec.toLower();
+        if (lowerExec.contains(QLatin1String("android")) ||
+            lowerExec.contains(QLatin1String("aprun")) ||
+            lowerExec.contains(QLatin1String("intent")) ||
+            lowerExec.contains(QLatin1String("component")) ||
+            lowerExec.contains(QLatin1String("package")) ||
+            path.toLower().contains(QLatin1String("android"))) {
+            appType = QLatin1String("android");
+        }
+        outModel.appType = appType;
+
         return true;
     }
 }

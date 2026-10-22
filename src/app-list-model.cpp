@@ -38,6 +38,7 @@ QHash<int, QByteArray> AppListModel::roleNames() const {
     roles[FDRIcon] = "icon";
     roles[FDRId] = "appId";
     roles[FDRCommand] = "command";
+    roles[FDRAppType] = "appType";
     return roles;
 }
 

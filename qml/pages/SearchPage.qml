@@ -100,6 +100,57 @@ Page {
                    filterModel.setFilterFixedString(text)
                }
             }
+
+            // App-type filter (All / Sailfish / Android). Built from core QtQuick
+            // (Row/Rectangle/Text/MouseArea) + Theme only — NO Silica control types,
+            // because this Silica build has no SilicaSegmentedControl / SilicaButton
+            // (using one caused a white screen at load).
+            Row {
+                id: typeFilter
+
+                width: parent.width
+                height: Theme.itemSizeLarge
+
+                Rectangle {
+                    id: segAll
+                    width: typeFilter.width / 3
+                    height: typeFilter.height
+                    color: filterModel.filterMode === 0 ? Theme.highlightColor : "transparent"
+                    Text {
+                        anchors.centerIn: parent
+                        text: qsTr("All")
+                        color: filterModel.filterMode === 0 ? "white" : Theme.secondaryTextColor
+                        font.pixelSize: Theme.fontSizeMedium
+                    }
+                    MouseArea { anchors.fill: parent; onClicked: { filterModel.filterMode = 0 } }
+                }
+                Rectangle {
+                    id: segNative
+                    width: typeFilter.width / 3
+                    height: typeFilter.height
+                    color: filterModel.filterMode === 1 ? Theme.highlightColor : "transparent"
+                    Text {
+                        anchors.centerIn: parent
+                        text: qsTr("Sailfish")
+                        color: filterModel.filterMode === 1 ? "white" : Theme.secondaryTextColor
+                        font.pixelSize: Theme.fontSizeMedium
+                    }
+                    MouseArea { anchors.fill: parent; onClicked: { filterModel.filterMode = 1 } }
+                }
+                Rectangle {
+                    id: segAndroid
+                    width: typeFilter.width / 3
+                    height: typeFilter.height
+                    color: filterModel.filterMode === 2 ? Theme.highlightColor : "transparent"
+                    Text {
+                        anchors.centerIn: parent
+                        text: qsTr("Android")
+                        color: filterModel.filterMode === 2 ? "white" : Theme.secondaryTextColor
+                        font.pixelSize: Theme.fontSizeMedium
+                    }
+                    MouseArea { anchors.fill: parent; onClicked: { filterModel.filterMode = 2 } }
+                }
+            }
         }
 
         SilicaListView {

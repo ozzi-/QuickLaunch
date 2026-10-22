@@ -33,6 +33,9 @@ namespace FileDesktop {
             case FDRCommand:
                 data = command;
             break;
+            case FDRAppType:
+                data = appType;
+            break;
             default:
                 data = "-- No identified --";
         }

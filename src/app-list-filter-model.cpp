@@ -13,6 +13,39 @@ AppListFilterModel::AppListFilterModel(QObject *parent) :
     setFilterCaseSensitivity(Qt::CaseSensitivity::CaseInsensitive);
 }
 
+void AppListFilterModel::setFilterMode(int mode)
+{
+    if (m_filterMode == mode)
+        return;
+    m_filterMode = mode;
+    invalidateFilter();
+    emit filterModeChanged();
+}
+
+bool AppListFilterModel::filterAcceptsRow(int row, const QModelIndex &parent) const
+{
+    // Keep the existing name filter, then apply the app-type filter on top.
+    if (!QSortFilterProxyModel::filterAcceptsRow(row, parent))
+        return false;
+
+    if (m_filterMode == AppListFilterModel::All)
+        return true;
+
+    QAbstractItemModel *src = sourceModel();
+    if (!src)
+        return true;
+
+    const QString appType = src->data(src->index(row, 0, parent),
+                                      FileDesktop::FDRAppType).toString();
+
+    if (m_filterMode == AppListFilterModel::Native)
+        return appType != QLatin1String("android");   // everything not Android = native
+    if (m_filterMode == AppListFilterModel::Android)
+        return appType == QLatin1String("android");
+
+    return true;
+}
+
 void AppListFilterModel::sortModel()
 {
     sort(0, Qt::AscendingOrder);

@@ -12,6 +12,7 @@ namespace FileDesktop {
         FDRIcon = 3,
         FDRId = 4,
         FDRCommand = 5,
+        FDRAppType = 6,
     };
 
     // Q_ENUM(RoleEnum);

@@ -2,5 +2,6 @@
     <qresource prefix="/icons">
         <file alias="logo">icons/quick-launch.svg</file>
         <file alias="git">icons/git.svg</file>
+        <file alias="github">icons/github.svg</file>
     </qresource>
 </RCC>

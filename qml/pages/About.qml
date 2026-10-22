@@ -90,7 +90,7 @@ Page {
                        height: width
                        fillMode: Image.PreserveAspectFit
                        anchors.verticalCenter: parent.verticalCenter
-                       source: "qrc:///icons/git"
+                       source: "qrc:///icons/github"
                    }
 
                    Label{

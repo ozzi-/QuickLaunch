@@ -10,7 +10,7 @@ Name:       harbour-quick-launch
 
 Summary:    Quick Launch Applications
 Version:    1.3.0
-Release:    1
+Release:    2
 Group:      Qt/Qt
 License:    GPLv3
 URL:        https://gitlab.com/dracks/quicklaunchslx

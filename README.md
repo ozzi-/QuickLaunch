@@ -25,9 +25,13 @@ was missing day to day:
   so you can start typing immediately without tapping it.
 - **Clean state after launching** — launching an app resets the search field,
   so when you come back to QuickLaunch you always see the full list.
+- **App-type filter (All / Sailfish / Android)** — a toggle above the list
+  filters by app type. Android apps are detected by their `apkd-launcher` exec
+  prefix; everything else is treated as native Sailfish. The filter applies
+  to both the full list and search results.
 - **Sailfish OS 5.2 build** — the build setup was adapted to the SFOS 5.2 SDK
-  (Qt 5.6.3), so the app compiles cleanly for current devices. RPMs are provided
-  for `armv7hl` and `aarch64`.
+  (Qt 5.6.3), so the app compiles cleanly for current devices. RPM is provided
+  for `aarch64`.
 
 ## License
 

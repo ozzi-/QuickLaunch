@@ -119,7 +119,7 @@ Page {
                     Text {
                         anchors.centerIn: parent
                         text: qsTr("All")
-                        color: filterModel.filterMode === 0 ? "white" : Theme.secondaryTextColor
+                        color: filterModel.filterMode === 0 ? "white" : Theme.primaryColor
                         font.pixelSize: Theme.fontSizeMedium
                     }
                     MouseArea { anchors.fill: parent; onClicked: { filterModel.filterMode = 0 } }
@@ -131,8 +131,8 @@ Page {
                     color: filterModel.filterMode === 1 ? Theme.highlightColor : "transparent"
                     Text {
                         anchors.centerIn: parent
-                        text: qsTr("Sailfish")
-                        color: filterModel.filterMode === 1 ? "white" : Theme.secondaryTextColor
+                        text: qsTr("Native")
+                        color: filterModel.filterMode === 1 ? "white" : Theme.primaryColor
                         font.pixelSize: Theme.fontSizeMedium
                     }
                     MouseArea { anchors.fill: parent; onClicked: { filterModel.filterMode = 1 } }
@@ -145,7 +145,7 @@ Page {
                     Text {
                         anchors.centerIn: parent
                         text: qsTr("Android")
-                        color: filterModel.filterMode === 2 ? "white" : Theme.secondaryTextColor
+                        color: filterModel.filterMode === 2 ? "white" : Theme.primaryColor
                         font.pixelSize: Theme.fontSizeMedium
                     }
                     MouseArea { anchors.fill: parent; onClicked: { filterModel.filterMode = 2 } }

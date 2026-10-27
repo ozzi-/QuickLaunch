@@ -39,6 +39,14 @@ protected:
 
 private:
     int m_filterMode = All;
+
+    // Force a GENUINE re-sort. QSortFilterProxyModel::sort(col, order) is a
+    // no-op when the (column, order) pair is unchanged, so a plain sort(0,
+    // Ascending) after init does nothing. This 5.6 build has no
+    // setSortIndicator; the only lever is the order: sort descending (a
+    // different pair -> real re-sort) then ascending again. lessThan() already
+    // orders Recent mode by recency, so the final Ascending state is correct.
+    void resort();
 };
 
 #endif // APPLISTFILTERMODEL_H

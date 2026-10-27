@@ -17,8 +17,8 @@ AppListFilterModel::AppListFilterModel(QObject *parent) :
     // changes: refresh the filter and the recency sort.
     connect(LaunchHistory::instance(), &LaunchHistory::changed,
             this, [this]() {
-        invalidateFilter();
-        sort(0, Qt::AscendingOrder);
+        invalidateFilter();   // update which apps count as "recent"
+        resort();             // re-order by recency (plain sort() is a no-op in 5.6)
     });
 }
 
@@ -28,9 +28,10 @@ void AppListFilterModel::setFilterMode(int mode)
         return;
     m_filterMode = mode;
     invalidateFilter();
-    // Recent mode is sorted by recency instead of by name; every other mode
-    // by name. Re-sorting on every switch keeps both correct.
-    sort(0, Qt::AscendingOrder);
+    // Recent mode is ordered by recency, every other mode by name. Re-sort on
+    // every switch so both stay correct (plain sort() is a no-op in Qt 5.6 when
+    // the sort indicator is already (0, Ascending) — see resort()).
+    resort();
     emit filterModeChanged();
 }
 
@@ -87,6 +88,21 @@ bool AppListFilterModel::lessThan(const QModelIndex &left, const QModelIndex &ri
 
 void AppListFilterModel::sortModel()
 {
+    resort();
+}
+
+void AppListFilterModel::resort()
+{
+    if (!sourceModel())
+        return;
+    // QSortFilterProxyModel::sort(column, order) is a NO-OP when the
+    // (column, order) pair is unchanged, so a plain sort(0, Ascending) after
+    // the model is already in that state does nothing. This 5.6 build has no
+    // setSortIndicator, so the only lever is the order: sort descending (a
+    // different pair -> genuine re-sort), then ascending again. lessThan()
+    // already orders Recent mode by recency, so the final Ascending state is
+    // correct.
+    sort(0, Qt::DescendingOrder);
     sort(0, Qt::AscendingOrder);
 }
 

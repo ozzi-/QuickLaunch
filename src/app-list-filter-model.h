@@ -13,7 +13,8 @@ public:
     enum FilterMode {
         All = 0,      // show everything
         Native = 1,   // show only non-Android (native Sailfish) apps
-        Android = 2   // show only Android apps
+        Android = 2,  // show only Android apps
+        Recent = 3    // only apps launched through QuickLaunch, newest first
     };
 
 public slots:
@@ -34,6 +35,7 @@ signals:
 
 protected:
     bool filterAcceptsRow(int row, const QModelIndex &parent) const override;
+    bool lessThan(const QModelIndex &left, const QModelIndex &right) const override;
 
 private:
     int m_filterMode = All;

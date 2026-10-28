@@ -147,16 +147,30 @@ Page {
             // Silica control types, because this Silica build has no
             // SilicaSegmentedControl / SilicaButton (using one caused a white
             // screen at load).
-            Row {
+            //
+            // focus: false + a local FocusScope (both core QtQuick 2.0): tapping
+            // a filter must NOT move active focus away from searchField, else
+            // the keyboard visibly closes and re-opens (the flicker bug).
+            // The tap's focus transfer stays inside this scope; the search
+            // field keeps activeFocus and the keyboard stays up.
+            FocusScope {
                 id: typeFilter
 
                 width: parent.width
                 height: Theme.itemSizeLarge
+                focus: false
 
-                Rectangle {
+                Row {
+                    id: typeFilterRow
+
+                    width: parent.width
+                    height: parent.height
+
+                    Rectangle {
                     id: segAll
                     width: typeFilter.width / 4
                     height: typeFilter.height
+                    focus: false
                     color: filterModel.filterMode === 0 ? Theme.highlightColor : "transparent"
                     Text {
                         anchors.centerIn: parent
@@ -164,12 +178,13 @@ Page {
                         color: filterModel.filterMode === 0 ? "white" : Theme.primaryColor
                         font.pixelSize: Theme.fontSizeMedium
                     }
-                    MouseArea { anchors.fill: parent; onClicked: { filterModel.filterMode = 0 } }
+                    MouseArea { anchors.fill: parent; focus: false; onClicked: { filterModel.filterMode = 0 } }
                 }
                 Rectangle {
                     id: segNative
                     width: typeFilter.width / 4
                     height: typeFilter.height
+                    focus: false
                     color: filterModel.filterMode === 1 ? Theme.highlightColor : "transparent"
                     Text {
                         anchors.centerIn: parent
@@ -177,12 +192,13 @@ Page {
                         color: filterModel.filterMode === 1 ? "white" : Theme.primaryColor
                         font.pixelSize: Theme.fontSizeMedium
                     }
-                    MouseArea { anchors.fill: parent; onClicked: { filterModel.filterMode = 1 } }
+                    MouseArea { anchors.fill: parent; focus: false; onClicked: { filterModel.filterMode = 1 } }
                 }
                 Rectangle {
                     id: segAndroid
                     width: typeFilter.width / 4
                     height: typeFilter.height
+                    focus: false
                     color: filterModel.filterMode === 2 ? Theme.highlightColor : "transparent"
                     Text {
                         anchors.centerIn: parent
@@ -190,12 +206,13 @@ Page {
                         color: filterModel.filterMode === 2 ? "white" : Theme.primaryColor
                         font.pixelSize: Theme.fontSizeMedium
                     }
-                    MouseArea { anchors.fill: parent; onClicked: { filterModel.filterMode = 2 } }
+                    MouseArea { anchors.fill: parent; focus: false; onClicked: { filterModel.filterMode = 2 } }
                 }
                 Rectangle {
                     id: segRecent
                     width: typeFilter.width / 4
                     height: typeFilter.height
+                    focus: false
                     color: filterModel.filterMode === 3 ? Theme.highlightColor : "transparent"
                     Text {
                         anchors.centerIn: parent
@@ -203,8 +220,9 @@ Page {
                         color: filterModel.filterMode === 3 ? "white" : Theme.primaryColor
                         font.pixelSize: Theme.fontSizeMedium
                     }
-                    MouseArea { anchors.fill: parent; onClicked: { filterModel.filterMode = 3 } }
+                    MouseArea { anchors.fill: parent; focus: false; onClicked: { filterModel.filterMode = 3 } }
                 }
+            }
             }
         }
 

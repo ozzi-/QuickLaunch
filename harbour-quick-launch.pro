@@ -10,7 +10,7 @@
 #   - translation filenames have to be changed
 
 # Version
-VERSION = 1.3.0
+VERSION = 1.4.0
 DEFINES += APP_VERSION=\\\"$$VERSION\\\"
 
 # The name of your application
@@ -24,6 +24,7 @@ SOURCES += \
     src/app-list-model.cpp \
     src/file-desktop/file-desktop.cpp \
     src/file-desktop/parser.cpp \
+    src/launch-history.cpp \
     src/quick-launcher.cpp
 
 DISTFILES += qml/QuickLauncher.qml \
@@ -53,7 +54,8 @@ TRANSLATIONS += translations/harbour-quick-launch-de.ts
 HEADERS += src/app-list-model.h \
     src/app-list-filter-model.h \
     src/file-desktop/file-desktop.h \
-    src/file-desktop/parser.h
+    src/file-desktop/parser.h \
+    src/launch-history.h
 
 RESOURCES += \
     resources.qrc

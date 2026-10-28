@@ -11,6 +11,7 @@
 #include "app-list-model.h"
 #include "app-list-filter-model.h"
 #include "file-desktop/file-desktop.h"
+#include "launch-history.h"
 
 int main(int argc, char *argv[])
 {
@@ -29,6 +30,16 @@ int main(int argc, char *argv[])
     qmlRegisterType<AppListModel>("es.jaumesingla", 1, 0, "AppListModel");
     // qmlRegisterType<FileDesktop::FileDesktopListModel>("es.jaumesingla", 1, 0, "FileDesktopModel");
     qmlRegisterType<AppListFilterModel>("es.jaumesingla", 1, 0, "AppListFilterModel");
+
+    qmlRegisterSingletonType<LaunchHistory>("es.jaumesingla",
+                                                       1,
+                                                       0,
+                                                       "LaunchHistory",
+                                                       [](QQmlEngine *engine, QJSEngine *scriptEngine) -> QObject * {
+                Q_UNUSED(engine)
+                Q_UNUSED(scriptEngine)
+                return LaunchHistory::instance();
+            });
 
     qmlRegisterSingletonType<AppListModel>("es.jaumesingla",
                                                        1,

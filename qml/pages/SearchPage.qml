@@ -8,50 +8,67 @@ Page {
     id: searchPage
     property string searchString
 
-    function activateFocus(){
-        searchField.selectAll()
-        searchField.forceActiveFocus()
-    }
-
+    // ------------------------------------------------------------------
+    // Focus + keyboard — the mechanism that reliably works on SFOS.
+    //
+    // On Sailfish OS the keyboard is a separate app (com.jolla.keyboard);
+    // the platform shows it whenever a text input holds *active* focus.
+    // The lever is forceActiveFocus(), but it silently no-ops until the
+    // window is active/visible — a single early call misses.
+    //
+    // (The regression this replaces branched on the STATIC `focus` property,
+    // which is always true, so it only ever did a focus off/on toggle and
+    // never actually grabbed active focus — the keyboard showed up nowhere.)
+    //
+    // So we retry on a short bounded interval and check activeFocus each tick
+    // (the approach that worked in v1.3.0). Triggers:
+    //   * page activates    -> onStatusChanged (app opened, back from About)
+    //   * app re-activates  -> Qt.application.active (returned from a launched
+    //     app; the page is still PageStatus.Active so onStatusChanged does not
+    //     fire). Qt.application.active is the authoritative SFOS signal —
+    //     Silica's own ApplicationWindow binds applicationActive to it.
     Timer {
-        id: timeout
-        interval: 1000
-        running: false
-        onTriggered: activateFocus()
-    }
-
-    // On first open the page reports PageStatus.Active before the window is
-    // fully visible, so forceActiveFocus() silently fails. Retry on a fixed
-    // schedule (checking each tick) until the field really has focus, so the
-    // user can type right away.
-    property bool focusLocked: false
-    Timer {
-        id: initialFocus
-        property int ticks: 0
-        interval: 200
-        running: searchPage.status === PageStatus.Active && !searchPage.focusLocked
+        id: focusRetry
+        interval: 150
         repeat: true
+        running: false
+        property int count: 0
         onTriggered: {
-            if (searchPage.focusLocked)
+            grabFocus()
+            // Stop once the field really has active focus, or after ~3 s.
+            if (searchField.activeFocus || count >= 20)
                 stop()
-            searchField.forceActiveFocus()
-            if (searchField.activeFocus) {
-                searchPage.focusLocked = true
-                stop()
-            } else {
-                ticks++
-                if (ticks >= 15) {   // give up after ~3 s; the user can tap the field
-                    searchPage.focusLocked = true
-                    stop()
-                }
-            }
+            count++
         }
     }
 
+    function grabFocus(){
+        if (searchField.activeFocus) {
+            // Already focused but the input panel is hidden (e.g. right after
+            // a launch) — the off/on toggle (Messages "Reset keyboard state"
+            // idiom) makes the panel reappear.
+            searchField.focus = false
+            searchField.focus = true
+        } else {
+            searchField.forceActiveFocus()
+        }
+    }
+
+    function startFocusRetries(){
+        focusRetry.count = 0
+        focusRetry.restart()
+    }
+
     onStatusChanged: {
-        console.log(status)
-        if (status === PageStatus.Active){
-            activateFocus()
+        if (status === PageStatus.Active)
+            startFocusRetries()
+    }
+
+    Connections {
+        target: Qt.application
+        onActiveChanged: {
+            if (Qt.application.active && searchPage.status === PageStatus.Active)
+                startFocusRetries()
         }
     }
 
@@ -66,7 +83,7 @@ Page {
                 })
                 pageStack.pop(pageOnStack, PageStackAction.Immediate)
                 __silica_applicationwindow_instance.activate()
-                activateFocus()
+                startFocusRetries()
             }
         }
 
@@ -101,10 +118,11 @@ Page {
                }
             }
 
-            // App-type filter (All / Sailfish / Android). Built from core QtQuick
-            // (Row/Rectangle/Text/MouseArea) + Theme only — NO Silica control types,
-            // because this Silica build has no SilicaSegmentedControl / SilicaButton
-            // (using one caused a white screen at load).
+            // App-type filter (All / Native / Android / Recent). Built from
+            // core QtQuick (Row/Rectangle/Text/MouseArea) + Theme only — NO
+            // Silica control types, because this Silica build has no
+            // SilicaSegmentedControl / SilicaButton (using one caused a white
+            // screen at load).
             Row {
                 id: typeFilter
 
@@ -113,7 +131,7 @@ Page {
 
                 Rectangle {
                     id: segAll
-                    width: typeFilter.width / 3
+                    width: typeFilter.width / 4
                     height: typeFilter.height
                     color: filterModel.filterMode === 0 ? Theme.highlightColor : "transparent"
                     Text {
@@ -126,7 +144,7 @@ Page {
                 }
                 Rectangle {
                     id: segNative
-                    width: typeFilter.width / 3
+                    width: typeFilter.width / 4
                     height: typeFilter.height
                     color: filterModel.filterMode === 1 ? Theme.highlightColor : "transparent"
                     Text {
@@ -139,7 +157,7 @@ Page {
                 }
                 Rectangle {
                     id: segAndroid
-                    width: typeFilter.width / 3
+                    width: typeFilter.width / 4
                     height: typeFilter.height
                     color: filterModel.filterMode === 2 ? Theme.highlightColor : "transparent"
                     Text {
@@ -149,6 +167,19 @@ Page {
                         font.pixelSize: Theme.fontSizeMedium
                     }
                     MouseArea { anchors.fill: parent; onClicked: { filterModel.filterMode = 2 } }
+                }
+                Rectangle {
+                    id: segRecent
+                    width: typeFilter.width / 4
+                    height: typeFilter.height
+                    color: filterModel.filterMode === 3 ? Theme.highlightColor : "transparent"
+                    Text {
+                        anchors.centerIn: parent
+                        text: qsTr("Recent")
+                        color: filterModel.filterMode === 3 ? "white" : Theme.primaryColor
+                        font.pixelSize: Theme.fontSizeMedium
+                    }
+                    MouseArea { anchors.fill: parent; onClicked: { filterModel.filterMode = 3 } }
                 }
             }
         }
@@ -182,15 +213,15 @@ Page {
                 contentHeight: Theme.itemSizeLarge
 
                 onClicked: function (){
-                    // filterModel.execute(appId);
+                    // Remember this app for the "Recent" view (persisted,
+                    // bounded to 100 entries in C++).
+                    LaunchHistory.recordLaunch(path)
                     launcher.launchApplication()
-                    // Reset to the original state: empty search, full list
+                    // Reset to the original state: empty search, full list.
+                    // Focus + keyboard are re-grabbed automatically when the
+                    // user comes back (Qt.application.active -> startFocusRetries()).
                     searchField.text = ""
                     __silica_applicationwindow_instance.deactivate()
-                    timeout.restart()
-                    // timeout.start()
-                    // activateFocus()
-                    // pageStack.push(Qt.resolvedUrl("LaunchPage.qml"), { appIcon: icon, appName: name})
                 }
 
                 LauncherItem {
@@ -241,6 +272,16 @@ Page {
                         }
                     }
                 }
+            }
+
+            // Empty-state hint: nothing launched through QuickLaunch yet.
+            Label {
+                anchors.centerIn: parent
+                visible: filterModel.filterMode === 3 && filterModel.count === 0
+                text: qsTr("No apps launched yet.\nStart a few and they will show up here.")
+                horizontalAlignment: Text.AlignHCenter
+                color: Theme.secondaryColor
+                font.pixelSize: Theme.fontSizeMedium
             }
         }
     }

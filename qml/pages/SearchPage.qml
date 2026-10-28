@@ -36,6 +36,8 @@ Page {
         property int count: 0
         onTriggered: {
             grabFocus()
+            if (!searchField.activeFocus)
+                LaunchHistory.dbg("retry#" + count + " still no focus")
             // Stop once the field really has active focus, or after ~3 s.
             if (searchField.activeFocus || count >= 25)
                 stop()
@@ -48,7 +50,10 @@ Page {
         id: focusDelay
         interval: 250
         running: false
-        onTriggered: startFocusRetries()
+        onTriggered: {
+            LaunchHistory.dbg("delay done -> startFocusRetries")
+            startFocusRetries()
+        }
     }
 
     function grabFocus(){
@@ -70,29 +75,38 @@ Page {
 
     // Page became active (app opened, back from About).
     onStatusChanged: {
-        if (status === PageStatus.Active)
+        if (status === PageStatus.Active) {
+            LaunchHistory.dbg("page active")
             requestKeyboard()
+        }
     }
 
     // App re-activated (returned from a launched app / minimize + reopen).
     Connections {
         target: Qt.application
         onActiveChanged: {
-            if (Qt.application.active && searchPage.status === PageStatus.Active)
+            if (Qt.application.active && searchPage.status === PageStatus.Active) {
+                LaunchHistory.dbg("app active")
                 requestKeyboard()
+            }
         }
     }
 
-    // THE fix for "keyboard closes right away on reopen": if the field loses
-    // active focus while we're on the page with the app in the foreground, grab
-    // it back (the fullscreen transition dismisses it; this re-grabs it).
+    // THE fix for "keyboard closes right away on reopen" AND for the filter-
+    // tap flicker: if the field loses active focus while we're on the page with
+    // the app in the foreground, grab it back SYNCHRONOUSLY. A delayed re-grab
+    // is exactly what made the keyboard visibly close and re-open on filter
+    // taps — the field was "unfocused" for the whole delay.
     Connections {
         target: searchField
         onActiveFocusChanged: {
             if (!searchField.activeFocus
                 && searchPage.status === PageStatus.Active
-                && Qt.application.active)
-                requestKeyboard()
+                && Qt.application.active) {
+                LaunchHistory.dbg("watcher: focus LOST -> immediate re-grab")
+                grabFocus()
+                startFocusRetries()
+            }
         }
     }
 
@@ -127,6 +141,7 @@ Page {
             id: headerContainer
 
             width: searchPage.width
+            focus: false   // never a focus-parking spot (see filter cluster below)
 
             SearchField {
                 id: searchField
@@ -148,25 +163,23 @@ Page {
             // SilicaSegmentedControl / SilicaButton (using one caused a white
             // screen at load).
             //
-            // focus: false + a local FocusScope (both core QtQuick 2.0): tapping
-            // a filter must NOT move active focus away from searchField, else
-            // the keyboard visibly closes and re-opens (the flicker bug).
-            // The tap's focus transfer stays inside this scope; the search
-            // field keeps activeFocus and the keyboard stays up.
-            FocusScope {
+            // KEYBOARD (the flicker fix): in Qt Quick EVERY item is
+            // focus: true by default, and a mouse press parks the active focus
+            // on the pressed item or its nearest focusable ancestor. One
+            // focusable item anywhere in the press path was enough to steal
+            // the focus from searchField and close the keyboard. So EVERY item
+            // in this cluster is focus: false, and each tap also re-asserts the
+            // field's active focus immediately (belt and braces; the
+            // focus-loss watcher does the same synchronously if anything
+            // ever takes it anyway). All core QtQuick 2.0 — Qt 5.6 safe.
+            Row {
                 id: typeFilter
 
                 width: parent.width
                 height: Theme.itemSizeLarge
                 focus: false
 
-                Row {
-                    id: typeFilterRow
-
-                    width: parent.width
-                    height: parent.height
-
-                    Rectangle {
+                Rectangle {
                     id: segAll
                     width: typeFilter.width / 4
                     height: typeFilter.height
@@ -174,11 +187,24 @@ Page {
                     color: filterModel.filterMode === 0 ? Theme.highlightColor : "transparent"
                     Text {
                         anchors.centerIn: parent
+                        focus: false
                         text: qsTr("All")
                         color: filterModel.filterMode === 0 ? "white" : Theme.primaryColor
                         font.pixelSize: Theme.fontSizeMedium
                     }
-                    MouseArea { anchors.fill: parent; focus: false; onClicked: { filterModel.filterMode = 0 } }
+                    MouseArea {
+                        anchors.fill: parent
+                        focus: false
+                        onPressed: {
+                            LaunchHistory.dbg("segAll press")
+                            grabFocus()
+                        }
+                        onClicked: {
+                            LaunchHistory.dbg("segAll click")
+                            filterModel.filterMode = 0
+                            grabFocus()
+                        }
+                    }
                 }
                 Rectangle {
                     id: segNative
@@ -188,11 +214,24 @@ Page {
                     color: filterModel.filterMode === 1 ? Theme.highlightColor : "transparent"
                     Text {
                         anchors.centerIn: parent
+                        focus: false
                         text: qsTr("Native")
                         color: filterModel.filterMode === 1 ? "white" : Theme.primaryColor
                         font.pixelSize: Theme.fontSizeMedium
                     }
-                    MouseArea { anchors.fill: parent; focus: false; onClicked: { filterModel.filterMode = 1 } }
+                    MouseArea {
+                        anchors.fill: parent
+                        focus: false
+                        onPressed: {
+                            LaunchHistory.dbg("segNative press")
+                            grabFocus()
+                        }
+                        onClicked: {
+                            LaunchHistory.dbg("segNative click")
+                            filterModel.filterMode = 1
+                            grabFocus()
+                        }
+                    }
                 }
                 Rectangle {
                     id: segAndroid
@@ -202,11 +241,24 @@ Page {
                     color: filterModel.filterMode === 2 ? Theme.highlightColor : "transparent"
                     Text {
                         anchors.centerIn: parent
+                        focus: false
                         text: qsTr("Android")
                         color: filterModel.filterMode === 2 ? "white" : Theme.primaryColor
                         font.pixelSize: Theme.fontSizeMedium
                     }
-                    MouseArea { anchors.fill: parent; focus: false; onClicked: { filterModel.filterMode = 2 } }
+                    MouseArea {
+                        anchors.fill: parent
+                        focus: false
+                        onPressed: {
+                            LaunchHistory.dbg("segAndroid press")
+                            grabFocus()
+                        }
+                        onClicked: {
+                            LaunchHistory.dbg("segAndroid click")
+                            filterModel.filterMode = 2
+                            grabFocus()
+                        }
+                    }
                 }
                 Rectangle {
                     id: segRecent
@@ -216,13 +268,25 @@ Page {
                     color: filterModel.filterMode === 3 ? Theme.highlightColor : "transparent"
                     Text {
                         anchors.centerIn: parent
+                        focus: false
                         text: qsTr("Recent")
                         color: filterModel.filterMode === 3 ? "white" : Theme.primaryColor
                         font.pixelSize: Theme.fontSizeMedium
                     }
-                    MouseArea { anchors.fill: parent; focus: false; onClicked: { filterModel.filterMode = 3 } }
+                    MouseArea {
+                        anchors.fill: parent
+                        focus: false
+                        onPressed: {
+                            LaunchHistory.dbg("segRecent press")
+                            grabFocus()
+                        }
+                        onClicked: {
+                            LaunchHistory.dbg("segRecent click")
+                            filterModel.filterMode = 3
+                            grabFocus()
+                        }
+                    }
                 }
-            }
             }
         }
 
@@ -245,6 +309,7 @@ Page {
                 id: header
                 width: headerContainer.width
                 height: headerContainer.height
+                focus: false   // never a focus-parking spot
                 Component.onCompleted: headerContainer.parent = header
             }
 

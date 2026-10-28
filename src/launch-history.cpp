@@ -5,6 +5,8 @@
 #include <QFileInfo>
 #include <QJsonArray>
 #include <QJsonDocument>
+#include <QDateTime>
+#include <QTextStream>
 
 static QString storageFile()
 {
@@ -52,6 +54,16 @@ void LaunchHistory::recordLaunch(const QString &path)
 
     save();
     emit changed();
+}
+
+void LaunchHistory::dbg(const QString &msg)
+{
+    QFile f(QDir::homePath()
+            + QStringLiteral("/.local/share/harbour-quick-launch/dbg.log"));
+    if (!f.open(QIODevice::Append | QIODevice::Text))
+        return;
+    QTextStream(&f) << QDateTime::currentMSecsSinceEpoch()
+                    << QStringLiteral(" ") << msg << QStringLiteral("\n");
 }
 
 void LaunchHistory::load()

@@ -21,14 +21,19 @@ I deliberately kept the original architecture (including the proper Sailfish
 launch path via the `lipstick` `LauncherItem`) and only added the features I
 was missing day to day:
 
-- **Autofocus on open** — the search field is focused the moment the app opens,
-  so you can start typing immediately without tapping it.
+- **Reliable keyboard** — the search field grabs focus the moment the app opens
+  and again whenever you return to it, so you can start typing immediately
+  without tapping it.
 - **Clean state after launching** — launching an app resets the search field,
   so when you come back to QuickLaunch you always see the full list.
 - **App-type filter (All / Native / Android)** — a toggle above the list
   filters by app type. Android apps are detected by their `apkd-launcher` exec
   prefix; everything else is treated as native Sailfish. The filter applies
   to both the full list and search results.
+- **Recent apps** — a **Recent** segment next to the type filter lists the
+  apps you have launched through QuickLaunch, most recent first. The list is
+  persisted across sessions (bounded to 100 entries and pruned of uninstalled
+  apps, so it can never grow unboundedly).
 - **Sailfish OS 5.2 build** — the build setup was adapted to the SFOS 5.2 SDK
   (Qt 5.6.3), so the app compiles cleanly for current devices. RPM is provided
   for `aarch64`.

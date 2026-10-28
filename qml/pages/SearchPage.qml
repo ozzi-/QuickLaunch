@@ -9,49 +9,54 @@ Page {
     property string searchString
 
     // ------------------------------------------------------------------
-    // Focus + keyboard — the mechanism that reliably works on SFOS.
+    // Focus + keyboard — reliable across open, minimize/reopen, and returning
+    // from a launched app.
     //
-    // On Sailfish OS the keyboard is a separate app (com.jolla.keyboard);
-    // the platform shows it whenever a text input holds *active* focus.
-    // The lever is forceActiveFocus(), but it silently no-ops until the
-    // window is active/visible — a single early call misses.
+    // SFOS shows the keyboard whenever the field holds *active* focus. Two
+    // things break it (both seen on this phone):
+    //   (1) forceActiveFocus() before the window is active/visible is a no-op;
+    //   (2) on re-activation the fullscreen transition dismisses the keyboard
+    //       *after* the grab — the "keyboard closes right away" bug.
     //
-    // (The regression this replaces branched on the STATIC `focus` property,
-    // which is always true, so it only ever did a focus off/on toggle and
-    // never actually grabbed active focus — the keyboard showed up nowhere.)
+    // Fix (mirrors Jolla's own PinInput / password field):
+    //   * grab on a short DELAY so the transition settles first, then retry a
+    //     few times until activeFocus really holds;
+    //   * re-grab the moment the field *loses* active focus while we're still
+    //     on the page with the app in the foreground (defeats the dismiss);
+    //   * drive it from page-active and app-active. Qt.application.active is
+    //     the authoritative SFOS signal (Silica binds applicationActive to it).
     //
-    // So we retry on a short bounded interval and check activeFocus each tick
-    // (the approach that worked in v1.3.0). Triggers:
-    //   * page activates    -> onStatusChanged (app opened, back from About)
-    //   * app re-activates  -> Qt.application.active (returned from a launched
-    //     app; the page is still PageStatus.Active so onStatusChanged does not
-    //     fire). Qt.application.active is the authoritative SFOS signal —
-    //     Silica's own ApplicationWindow binds applicationActive to it.
+    // Only safe Qt 5.6 Timer APIs are used (interval/running/start/stop/
+    // restart/onTriggered) — no stopped/elapsed/progress.
     Timer {
         id: focusRetry
-        interval: 150
+        interval: 120
         repeat: true
         running: false
         property int count: 0
         onTriggered: {
             grabFocus()
             // Stop once the field really has active focus, or after ~3 s.
-            if (searchField.activeFocus || count >= 20)
+            if (searchField.activeFocus || count >= 25)
                 stop()
             count++
         }
     }
 
+    // Let the re-activation fullscreen transition settle before grabbing.
+    Timer {
+        id: focusDelay
+        interval: 250
+        running: false
+        onTriggered: startFocusRetries()
+    }
+
     function grabFocus(){
-        if (searchField.activeFocus) {
-            // Already focused but the input panel is hidden (e.g. right after
-            // a launch) — the off/on toggle (Messages "Reset keyboard state"
-            // idiom) makes the panel reappear.
-            searchField.focus = false
-            searchField.focus = true
-        } else {
-            searchField.forceActiveFocus()
-        }
+        // forceActiveFocus() is the reliable lever (a focus off/on toggle is
+        // not — that was the "keyboard never shows" regression). Re-mark focus
+        // too, the way Jolla's PinInput does, so a hidden keyboard returns.
+        searchField.focus = true
+        searchField.forceActiveFocus()
     }
 
     function startFocusRetries(){
@@ -59,16 +64,35 @@ Page {
         focusRetry.restart()
     }
 
-    onStatusChanged: {
-        if (status === PageStatus.Active)
-            startFocusRetries()
+    function requestKeyboard(){
+        focusDelay.restart()
     }
 
+    // Page became active (app opened, back from About).
+    onStatusChanged: {
+        if (status === PageStatus.Active)
+            requestKeyboard()
+    }
+
+    // App re-activated (returned from a launched app / minimize + reopen).
     Connections {
         target: Qt.application
         onActiveChanged: {
             if (Qt.application.active && searchPage.status === PageStatus.Active)
-                startFocusRetries()
+                requestKeyboard()
+        }
+    }
+
+    // THE fix for "keyboard closes right away on reopen": if the field loses
+    // active focus while we're on the page with the app in the foreground, grab
+    // it back (the fullscreen transition dismisses it; this re-grabs it).
+    Connections {
+        target: searchField
+        onActiveFocusChanged: {
+            if (!searchField.activeFocus
+                && searchPage.status === PageStatus.Active
+                && Qt.application.active)
+                requestKeyboard()
         }
     }
 

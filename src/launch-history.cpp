@@ -54,6 +54,7 @@ void LaunchHistory::recordLaunch(const QString &path)
     emit changed();
 }
 
+
 void LaunchHistory::load()
 {
     QFile f(storageFile());

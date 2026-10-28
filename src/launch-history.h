@@ -40,6 +40,7 @@ public:
     // trim to MAX_ENTRIES, persist, notify.
     Q_INVOKABLE void recordLaunch(const QString &path);
 
+
 signals:
     void changed();
 

@@ -8,50 +8,61 @@ Page {
     id: searchPage
     property string searchString
 
+    // True right after a filter tap: the focus loss that follows is
+    // USER-INTENDED (the keyboard is meant to close and STAY closed) — the
+    // watcher must not re-grab. Consumed by the watcher; reset on every
+    // page/app (re)activation so it can never leak into a later session.
+    property bool suppressRegrab: false
+
     // ------------------------------------------------------------------
-    // Focus + keyboard — the mechanism that reliably works on SFOS.
+    // Focus + keyboard — VERIFIED ON THE PHONE (dbg.log traces, 1.4.0-4):
     //
-    // On Sailfish OS the keyboard is a separate app (com.jolla.keyboard);
-    // the platform shows it whenever a text input holds *active* focus.
-    // The lever is forceActiveFocus(), but it silently no-ops until the
-    // window is active/visible — a single early call misses.
+    //  * SFOS shows the keyboard while the field holds *active* focus.
+    //  * On re-activation the fullscreen transition dismisses the keyboard
+    //    ~0.9–2.9 s AFTER app-active, clearing active focus again.
+    //  * CRITICAL (measured): a re-grab of active focus that arrives
+    //    IMMEDIATELY after such a loss is SILENTLY SWALLOWED by Ibis —
+    //    activeFocus is restored (zero failed retries in the traces) but the
+    //    keyboard stays hidden. A re-grab DELAYED ~250 ms (Ibis's hide has
+    //    settled) is what actually brings the keyboard back. => NEVER
+    //    re-grab synchronously; always go through the delayed path.
+    //  * Tapping a filter steals the focus ~12 ms after the click (something
+    //    above the focus:false cluster). Per user decision the keyboard then
+    //    closes and STAYS closed (no flicker) => suppressRegrab.
+    //  * Qt.application.active is the authoritative SFOS activation signal
+    //    (Silica binds applicationActive to it).
     //
-    // (The regression this replaces branched on the STATIC `focus` property,
-    // which is always true, so it only ever did a focus off/on toggle and
-    // never actually grabbed active focus — the keyboard showed up nowhere.)
-    //
-    // So we retry on a short bounded interval and check activeFocus each tick
-    // (the approach that worked in v1.3.0). Triggers:
-    //   * page activates    -> onStatusChanged (app opened, back from About)
-    //   * app re-activates  -> Qt.application.active (returned from a launched
-    //     app; the page is still PageStatus.Active so onStatusChanged does not
-    //     fire). Qt.application.active is the authoritative SFOS signal —
-    //     Silica's own ApplicationWindow binds applicationActive to it.
+    // Only safe Qt 5.6 Timer APIs are used (interval/running/start/stop/
+    // restart/onTriggered) — no stopped/elapsed/progress.
     Timer {
         id: focusRetry
-        interval: 150
+        interval: 120
         repeat: true
         running: false
         property int count: 0
         onTriggered: {
             grabFocus()
             // Stop once the field really has active focus, or after ~3 s.
-            if (searchField.activeFocus || count >= 20)
+            if (searchField.activeFocus || count >= 25)
                 stop()
             count++
         }
     }
 
+    // Let the re-activation fullscreen transition settle before grabbing.
+    Timer {
+        id: focusDelay
+        interval: 250
+        running: false
+        onTriggered: startFocusRetries()
+    }
+
     function grabFocus(){
-        if (searchField.activeFocus) {
-            // Already focused but the input panel is hidden (e.g. right after
-            // a launch) — the off/on toggle (Messages "Reset keyboard state"
-            // idiom) makes the panel reappear.
-            searchField.focus = false
-            searchField.focus = true
-        } else {
-            searchField.forceActiveFocus()
-        }
+        // forceActiveFocus() is the reliable lever (a focus off/on toggle is
+        // not — that was the "keyboard never shows" regression). Re-mark focus
+        // too, the way Jolla's PinInput does, so a hidden keyboard returns.
+        searchField.focus = true
+        searchField.forceActiveFocus()
     }
 
     function startFocusRetries(){
@@ -59,16 +70,47 @@ Page {
         focusRetry.restart()
     }
 
-    onStatusChanged: {
-        if (status === PageStatus.Active)
-            startFocusRetries()
+    function requestKeyboard(){
+        focusDelay.restart()
     }
 
+    // Page became active (app opened, back from About). Fresh start: the
+    // keyboard is wanted, so allow re-grabs (clear any stale suppression).
+    onStatusChanged: {
+        if (status === PageStatus.Active) {
+            suppressRegrab = false
+            requestKeyboard()
+        }
+    }
+
+    // App re-activated (returned from a launched app / minimize + reopen).
     Connections {
         target: Qt.application
         onActiveChanged: {
-            if (Qt.application.active && searchPage.status === PageStatus.Active)
-                startFocusRetries()
+            if (Qt.application.active && searchPage.status === PageStatus.Active) {
+                suppressRegrab = false
+                requestKeyboard()
+            }
+        }
+    }
+
+    // If the field loses active focus while on-page with the app in the
+    // foreground, re-grab it — but ONLY via the proven DELAYED path (Ibis
+    // swallows an immediate re-grab; ~250 ms later it lands). This is what
+    // brings the keyboard back after the minimize/reopen transition dismiss.
+    // A focus loss right after a filter tap is user-intended (the keyboard
+    // closes by design) and is consumed via suppressRegrab.
+    Connections {
+        target: searchField
+        onActiveFocusChanged: {
+            if (!searchField.activeFocus
+                && searchPage.status === PageStatus.Active
+                && Qt.application.active) {
+                if (suppressRegrab)
+                    suppressRegrab = false
+                else
+                    requestKeyboard()
+            }
         }
     }
 
@@ -103,6 +145,7 @@ Page {
             id: headerContainer
 
             width: searchPage.width
+            focus: false   // never a focus-parking spot (see filter cluster below)
 
             SearchField {
                 id: searchField
@@ -123,63 +166,108 @@ Page {
             // Silica control types, because this Silica build has no
             // SilicaSegmentedControl / SilicaButton (using one caused a white
             // screen at load).
+            //
+            // KEYBOARD: in Qt Quick EVERY item is focus: true by default, and
+            // a press parks the active focus on the pressed item or its nearest
+            // focusable ancestor, so every item in this cluster is focus:
+            // false (all core QtQuick 2.0 — Qt 5.6 safe). Tapping a filter
+            // still steals the focus (~12 ms after the click) and closes the
+            // keyboard — that is the DESIRED behavior (no flicker); the
+            // suppressRegrab flag keeps the watcher from re-grabbing it.
             Row {
                 id: typeFilter
 
                 width: parent.width
                 height: Theme.itemSizeLarge
+                focus: false
 
                 Rectangle {
                     id: segAll
                     width: typeFilter.width / 4
                     height: typeFilter.height
+                    focus: false
                     color: filterModel.filterMode === 0 ? Theme.highlightColor : "transparent"
                     Text {
                         anchors.centerIn: parent
+                        focus: false
                         text: qsTr("All")
                         color: filterModel.filterMode === 0 ? "white" : Theme.primaryColor
                         font.pixelSize: Theme.fontSizeMedium
                     }
-                    MouseArea { anchors.fill: parent; onClicked: { filterModel.filterMode = 0 } }
+                    MouseArea {
+                        anchors.fill: parent
+                        focus: false
+                        onClicked: {
+                            filterModel.filterMode = 0
+                            suppressRegrab = true   // keyboard closes by design
+                        }
+                    }
                 }
                 Rectangle {
                     id: segNative
                     width: typeFilter.width / 4
                     height: typeFilter.height
+                    focus: false
                     color: filterModel.filterMode === 1 ? Theme.highlightColor : "transparent"
                     Text {
                         anchors.centerIn: parent
+                        focus: false
                         text: qsTr("Native")
                         color: filterModel.filterMode === 1 ? "white" : Theme.primaryColor
                         font.pixelSize: Theme.fontSizeMedium
                     }
-                    MouseArea { anchors.fill: parent; onClicked: { filterModel.filterMode = 1 } }
+                    MouseArea {
+                        anchors.fill: parent
+                        focus: false
+                        onClicked: {
+                            filterModel.filterMode = 1
+                            suppressRegrab = true   // keyboard closes by design
+                        }
+                    }
                 }
                 Rectangle {
                     id: segAndroid
                     width: typeFilter.width / 4
                     height: typeFilter.height
+                    focus: false
                     color: filterModel.filterMode === 2 ? Theme.highlightColor : "transparent"
                     Text {
                         anchors.centerIn: parent
+                        focus: false
                         text: qsTr("Android")
                         color: filterModel.filterMode === 2 ? "white" : Theme.primaryColor
                         font.pixelSize: Theme.fontSizeMedium
                     }
-                    MouseArea { anchors.fill: parent; onClicked: { filterModel.filterMode = 2 } }
+                    MouseArea {
+                        anchors.fill: parent
+                        focus: false
+                        onClicked: {
+                            filterModel.filterMode = 2
+                            suppressRegrab = true   // keyboard closes by design
+                        }
+                    }
                 }
                 Rectangle {
                     id: segRecent
                     width: typeFilter.width / 4
                     height: typeFilter.height
+                    focus: false
                     color: filterModel.filterMode === 3 ? Theme.highlightColor : "transparent"
                     Text {
                         anchors.centerIn: parent
+                        focus: false
                         text: qsTr("Recent")
                         color: filterModel.filterMode === 3 ? "white" : Theme.primaryColor
                         font.pixelSize: Theme.fontSizeMedium
                     }
-                    MouseArea { anchors.fill: parent; onClicked: { filterModel.filterMode = 3 } }
+                    MouseArea {
+                        anchors.fill: parent
+                        focus: false
+                        onClicked: {
+                            filterModel.filterMode = 3
+                            suppressRegrab = true   // keyboard closes by design
+                        }
+                    }
                 }
             }
         }
@@ -203,6 +291,7 @@ Page {
                 id: header
                 width: headerContainer.width
                 height: headerContainer.height
+                focus: false   // never a focus-parking spot
                 Component.onCompleted: headerContainer.parent = header
             }
 

@@ -42,8 +42,6 @@ Page {
         property int count: 0
         onTriggered: {
             grabFocus()
-            if (!searchField.activeFocus)
-                LaunchHistory.dbg("retry#" + count + " still no focus")
             // Stop once the field really has active focus, or after ~3 s.
             if (searchField.activeFocus || count >= 25)
                 stop()
@@ -56,10 +54,7 @@ Page {
         id: focusDelay
         interval: 250
         running: false
-        onTriggered: {
-            LaunchHistory.dbg("delay done -> startFocusRetries")
-            startFocusRetries()
-        }
+        onTriggered: startFocusRetries()
     }
 
     function grabFocus(){
@@ -83,7 +78,6 @@ Page {
     // keyboard is wanted, so allow re-grabs (clear any stale suppression).
     onStatusChanged: {
         if (status === PageStatus.Active) {
-            LaunchHistory.dbg("page active")
             suppressRegrab = false
             requestKeyboard()
         }
@@ -94,7 +88,6 @@ Page {
         target: Qt.application
         onActiveChanged: {
             if (Qt.application.active && searchPage.status === PageStatus.Active) {
-                LaunchHistory.dbg("app active")
                 suppressRegrab = false
                 requestKeyboard()
             }
@@ -113,13 +106,10 @@ Page {
             if (!searchField.activeFocus
                 && searchPage.status === PageStatus.Active
                 && Qt.application.active) {
-                if (suppressRegrab) {
-                    LaunchHistory.dbg("watcher: focus LOST (filter tap) -> suppressed")
+                if (suppressRegrab)
                     suppressRegrab = false
-                } else {
-                    LaunchHistory.dbg("watcher: focus LOST -> delayed re-grab")
+                else
                     requestKeyboard()
-                }
             }
         }
     }
@@ -208,7 +198,6 @@ Page {
                         anchors.fill: parent
                         focus: false
                         onClicked: {
-                            LaunchHistory.dbg("segAll click")
                             filterModel.filterMode = 0
                             suppressRegrab = true   // keyboard closes by design
                         }
@@ -231,7 +220,6 @@ Page {
                         anchors.fill: parent
                         focus: false
                         onClicked: {
-                            LaunchHistory.dbg("segNative click")
                             filterModel.filterMode = 1
                             suppressRegrab = true   // keyboard closes by design
                         }
@@ -254,7 +242,6 @@ Page {
                         anchors.fill: parent
                         focus: false
                         onClicked: {
-                            LaunchHistory.dbg("segAndroid click")
                             filterModel.filterMode = 2
                             suppressRegrab = true   // keyboard closes by design
                         }
@@ -277,7 +264,6 @@ Page {
                         anchors.fill: parent
                         focus: false
                         onClicked: {
-                            LaunchHistory.dbg("segRecent click")
                             filterModel.filterMode = 3
                             suppressRegrab = true   // keyboard closes by design
                         }

@@ -40,10 +40,6 @@ public:
     // trim to MAX_ENTRIES, persist, notify.
     Q_INVOKABLE void recordLaunch(const QString &path);
 
-    // TEMPORARY diagnostic (removed after the keyboard-flicker investigation):
-    // append "<msSinceEpoch> <msg>" to
-    // ~/.local/share/harbour-quick-launch/dbg.log
-    Q_INVOKABLE void dbg(const QString &msg);
 
 signals:
     void changed();

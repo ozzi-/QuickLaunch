@@ -25,6 +25,7 @@ SOURCES += \
     src/file-desktop/file-desktop.cpp \
     src/file-desktop/parser.cpp \
     src/launch-history.cpp \
+    src/quick-launch-settings.cpp \
     src/quick-launcher.cpp
 
 DISTFILES += qml/QuickLauncher.qml \
@@ -32,6 +33,7 @@ DISTFILES += qml/QuickLauncher.qml \
     qml/pages/About.qml \
     qml/pages/LaunchPage.qml \
     qml/pages/SearchPage.qml \
+    qml/pages/Settings.qml \
     rpm/harbour-quick-launch.changes.in \
     rpm/harbour-quick-launch.changes.run.in \
     rpm/harbour-quick-launch.spec \
@@ -55,7 +57,8 @@ HEADERS += src/app-list-model.h \
     src/app-list-filter-model.h \
     src/file-desktop/file-desktop.h \
     src/file-desktop/parser.h \
-    src/launch-history.h
+    src/launch-history.h \
+    src/quick-launch-settings.h
 
 RESOURCES += \
     resources.qrc

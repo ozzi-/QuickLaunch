@@ -12,6 +12,7 @@
 #include "app-list-filter-model.h"
 #include "file-desktop/file-desktop.h"
 #include "launch-history.h"
+#include "quick-launch-settings.h"
 
 int main(int argc, char *argv[])
 {
@@ -39,6 +40,16 @@ int main(int argc, char *argv[])
                 Q_UNUSED(engine)
                 Q_UNUSED(scriptEngine)
                 return LaunchHistory::instance();
+            });
+
+    qmlRegisterSingletonType<QuickLaunchSettings>("es.jaumesingla",
+                                                       1,
+                                                       0,
+                                                       "QuickLaunchSettings",
+                                                       [](QQmlEngine *engine, QJSEngine *scriptEngine) -> QObject * {
+                Q_UNUSED(engine)
+                Q_UNUSED(scriptEngine)
+                return QuickLaunchSettings::instance();
             });
 
     qmlRegisterSingletonType<AppListModel>("es.jaumesingla",

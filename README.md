@@ -22,14 +22,18 @@ launch path via the `lipstick` `LauncherItem`) and only added the features I
 was missing day to day:
 
 - **Reliable keyboard** — the search field grabs focus the moment the app opens
-  and again whenever you return to it, so you can start typing immediately
-  without tapping it.
+  and again whenever you return to it (including from the home-screen tile),
+  so you can start typing immediately without tapping it.
+- **Close after launching (setting)** — in Settings you can make QuickLaunch
+  quit instead of minimizing when you launch an app. The preference is
+  persisted across sessions.
 - **Clean state after launching** — launching an app resets the search field,
   so when you come back to QuickLaunch you always see the full list.
 - **App-type filter (All / Native / Android)** — a toggle above the list
   filters by app type. Android apps are detected by their `apkd-launcher` exec
   prefix; everything else is treated as native Sailfish. The filter applies
-  to both the full list and search results.
+  to both the full list and search results. (A **Recent** segment sits next
+  to it — see below.)
 - **Recent apps** — a **Recent** segment next to the type filter lists the
   apps you have launched through QuickLaunch, most recent first. The list is
   persisted across sessions (bounded to 100 entries and pruned of uninstalled

@@ -1,4 +1,5 @@
 import QtQuick 2.0
+import QtQuick.Window 2.0
 import Sailfish.Silica 1.0
 import org.nemomobile.lipstick 0.1
 
@@ -57,6 +58,16 @@ Page {
         onTriggered: startFocusRetries()
     }
 
+    // "Close after launching" setting: quit the app shortly after the launch
+    // request has been handed to the launcher daemon. The short delay gives
+    // LauncherItem time to deliver the launch before our process exits.
+    Timer {
+        id: closeAfterLaunchTimer
+        interval: 300
+        running: false
+        onTriggered: Qt.quit()
+    }
+
     function grabFocus(){
         // forceActiveFocus() is the reliable lever (a focus off/on toggle is
         // not — that was the "keyboard never shows" regression). Re-mark focus
@@ -72,6 +83,48 @@ Page {
 
     function requestKeyboard(){
         focusDelay.restart()
+    }
+
+    // Tile -> fullscreen reopen fix (2026-11):
+    //
+    // When the app sits in the home-screen tile for a while, it reopens with
+    // the field STILL HOLDING activeFocus while the keyboard is hidden (Ibis
+    // dismissed it in the background). None of the usual triggers fire in
+    // that state: Qt.application.active already was true (no activeChanged),
+    // the page is already Active (no statusChanged), and no focus LOSS
+    // happens (no watcher fire). So nothing asks for the keyboard.
+    //
+    // The one reliable signal for the tile -> fullscreen transition is the
+    // WINDOW GEOMETRY changing from small (tile) to large (fullscreen).
+    // When we detect that, the keyboard is hidden while focus is held — the
+    // state the plain grabFocus() cannot fix. Cure = the only phone-verified
+    // path: drop the focus (keyboard hidden either way) and re-grab DELAYED
+    // ~250 ms, so Ibis sees a fresh acquisition instead of an immediate
+    // (swallowed) re-grab.
+    function refreshKeyboard(){
+        if (!searchField.activeFocus)
+            return   // focus already lost -> the watcher/normal path handles it
+        searchField.activeFocus = false
+        focusDelay.restart()
+    }
+
+    // Window size tracking: distinguishes tile<->fullscreen transitions
+    // (small <-> large) from in-foreground events like rotation (large ->
+    // large), which must not disturb the keyboard.
+    property real lastWinArea: 0
+    function isFullArea(w, h){
+        return w * h >= (Screen.width * Screen.height) / 2
+    }
+    Connections {
+        target: window
+        onGeometryChanged: {
+            const nowLarge = isFullArea(window.width, window.height)
+            const wasSmall = lastWinArea > 0
+                             && lastWinArea < (Screen.width * Screen.height) / 2
+            lastWinArea = window.width * window.height
+            if (nowLarge && wasSmall && searchPage.status === PageStatus.Active)
+                refreshKeyboard()
+        }
     }
 
     // Page became active (app opened, back from About). Fresh start: the
@@ -135,6 +188,10 @@ Page {
         anchors.fill: parent
 
         PullDownMenu {
+            MenuItem {
+                text: qsTr("Settings")
+                onClicked: pageStack.push(Qt.resolvedUrl("Settings.qml"))
+            }
             MenuItem {
                 text: qsTr("About Quick Launch")
                 onClicked: pageStack.push(Qt.resolvedUrl("About.qml"))
@@ -307,10 +364,13 @@ Page {
                     LaunchHistory.recordLaunch(path)
                     launcher.launchApplication()
                     // Reset to the original state: empty search, full list.
-                    // Focus + keyboard are re-grabbed automatically when the
-                    // user comes back (Qt.application.active -> startFocusRetries()).
                     searchField.text = ""
-                    __silica_applicationwindow_instance.deactivate()
+                    if (QuickLaunchSettings.closeAfterLaunch)
+                        closeAfterLaunchTimer.start()
+                    else
+                        __silica_applicationwindow_instance.deactivate()
+                    // (If the app survives, focus + keyboard are re-grabbed
+                    //  automatically when the user comes back.)
                 }
 
                 LauncherItem {

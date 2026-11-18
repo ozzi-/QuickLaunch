@@ -370,22 +370,27 @@ Page {
                     filePath: path
                 }
 
-                // "Close after launching": quit only after the platform
-                // reports the launch is finished.
+                // "Close after launching": quit once the launch request has
+                // been DISPATCHED to the platform — not once the app is
+                // fully loaded.
                 //
-                // lipstick's LauncherItem exposes `isLaunching` (Q_PROPERTY
-                // bool, set by launchApplication(), cleared when the platform
-                // finishes the launch or its own 5 s failsafe elapses — see
+                // On SFOS 5 the launch is handled system-side (lipstick →
+                // sailjail/mapplauncherd, "the platform in control of the
+                // launching process"), so once the request has left our
+                // process, QuickLaunch's exit cannot abort the target app.
+                // lipstick's LauncherItem marks that moment with
+                // `isLaunching` (Q_PROPERTY bool, set right after the
+                // ContentAction/D-Bus launch request is issued — see
                 // sailfishos/lipstick src/components/launcheritem.{h,cpp}).
-                // Waiting for it to clear is the platform's own guarantee
-                // that the app has started, so our exit can never abort the
-                // launch (the old 300 ms quit did exactly that for
-                // slow-starting apps).
+                // We therefore wait for it to become TRUE, then quit after a
+                // short buffer. (The old approach waited for it to CLEAR,
+                // which means "app fully loaded" — up to the platform's 5 s
+                // failsafe. Rejected as too slow.)
                 //
                 // The property is POLLED (plain JS property access), never
                 // connected via a signal: if a lipstick build lacks the
-                // property, the read yields undefined and the fallback below
-                // kicks in — no white-screen risk.
+                // property, the read yields undefined and the fixed-delay
+                // fallback below kicks in — no white-screen risk.
                 Timer {
                     id: closeWait
                     interval: 200
@@ -397,16 +402,19 @@ Page {
                         const launching = launcher.isLaunching
                         if (launching === undefined) {
                             // Property unavailable on this lipstick build:
-                            // plain delay (10 * 200 ms = 2 s, up from the
-                            // old 300 ms).
-                            if (ticks >= 10) {
+                            // fixed delay (8 * 200 ms = 1.6 s).
+                            if (ticks >= 8) {
                                 stop()
                                 closeQuit.start()
                             }
-                        } else if (!launching || ticks >= 30) {
-                            // Platform says the launch is done — or our 6 s
-                            // cap (the platform's own failsafe is 5 s) as a
-                            // safety net.
+                        } else if (launching === true) {
+                            // Platform has taken the launch over → safe to
+                            // exit. closeQuit adds the buffer.
+                            stop()
+                            closeQuit.start()
+                        } else if (ticks >= 15) {
+                            // Safety cap (3 s): if the flag never flips,
+                            // quit anyway rather than hang.
                             stop()
                             closeQuit.start()
                         }
@@ -415,7 +423,7 @@ Page {
 
                 Timer {
                     id: closeQuit
-                    interval: 250
+                    interval: 300
                     running: false
                     onTriggered: Qt.quit()
                 }

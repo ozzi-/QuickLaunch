@@ -30,8 +30,9 @@ Page {
 
                 Column {
                     id: closeLabels
-                    width: parent.width - toggleSwitch.width
-                            - 3 * Theme.horizontalPageMargin
+                    x: Theme.horizontalPageMargin
+                    width: parent.width - x - toggleSwitch.width
+                            - 2 * Theme.horizontalPageMargin
                     anchors.verticalCenter: parent.verticalCenter
                     spacing: Theme.paddingSmall
 
@@ -57,6 +58,16 @@ Page {
                     anchors.verticalCenter: parent.verticalCenter
                     checked: QuickLaunchSettings.closeAfterLaunch
                     onCheckedChanged: QuickLaunchSettings.closeAfterLaunch = checked
+                }
+
+                // Whole row is the tap target (this Silica has no
+                // SilicaSwitchRow — see HANDOFF.md white-screen rule).
+                // Declared last, so it sits on top and also covers the
+                // Switch itself; tapping anywhere on the row toggles.
+                MouseArea {
+                    anchors.fill: parent
+                    focus: false
+                    onClicked: toggleSwitch.checked = !toggleSwitch.checked
                 }
             }
         }

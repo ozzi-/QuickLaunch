@@ -7,6 +7,11 @@ Page {
     id: page
     allowedOrientations: Orientation.All
 
+    // Page edge margin. Theme.horizontalPageMargin is what Silica prescribes,
+    // but on this phone it renders close to the edge — enforce a comfortable
+    // minimum (user-reported, 1.5.0-3/4).
+    readonly property real pageMargin: Math.max(Theme.horizontalPageMargin, 28)
+
     // Only components verified to exist in this Silica (see HANDOFF.md
     // white-screen rule): PageHeader, Label, Switch, SilicaFlickable.
     SilicaFlickable {
@@ -30,9 +35,9 @@ Page {
 
                 Column {
                     id: closeLabels
-                    x: Theme.horizontalPageMargin
+                    x: page.pageMargin
                     width: parent.width - x - toggleSwitch.width
-                            - 2 * Theme.horizontalPageMargin
+                            - page.pageMargin
                     anchors.verticalCenter: parent.verticalCenter
                     spacing: Theme.paddingSmall
 
@@ -54,7 +59,7 @@ Page {
 
                 Switch {
                     id: toggleSwitch
-                    x: parent.width - width - Theme.horizontalPageMargin
+                    x: parent.width - width - page.pageMargin
                     anchors.verticalCenter: parent.verticalCenter
                     checked: QuickLaunchSettings.closeAfterLaunch
                     onCheckedChanged: QuickLaunchSettings.closeAfterLaunch = checked

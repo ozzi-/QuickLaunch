@@ -58,16 +58,6 @@ Page {
         onTriggered: startFocusRetries()
     }
 
-    // "Close after launching" setting: quit the app shortly after the launch
-    // request has been handed to the launcher daemon. The short delay gives
-    // LauncherItem time to deliver the launch before our process exits.
-    Timer {
-        id: closeAfterLaunchTimer
-        interval: 300
-        running: false
-        onTriggered: Qt.quit()
-    }
-
     function grabFocus(){
         // forceActiveFocus() is the reliable lever (a focus off/on toggle is
         // not — that was the "keyboard never shows" regression). Re-mark focus
@@ -365,17 +355,69 @@ Page {
                     launcher.launchApplication()
                     // Reset to the original state: empty search, full list.
                     searchField.text = ""
-                    if (QuickLaunchSettings.closeAfterLaunch)
-                        closeAfterLaunchTimer.start()
-                    else
+                    if (QuickLaunchSettings.closeAfterLaunch) {
+                        closeWait.ticks = 0
+                        closeWait.restart()
+                    } else {
                         __silica_applicationwindow_instance.deactivate()
-                    // (If the app survives, focus + keyboard are re-grabbed
-                    //  automatically when the user comes back.)
+                        // (Focus + keyboard are re-grabbed automatically when
+                        //  the user comes back.)
+                    }
                 }
 
                 LauncherItem {
                     id: launcher
                     filePath: path
+                }
+
+                // "Close after launching": quit only after the platform
+                // reports the launch is finished.
+                //
+                // lipstick's LauncherItem exposes `isLaunching` (Q_PROPERTY
+                // bool, set by launchApplication(), cleared when the platform
+                // finishes the launch or its own 5 s failsafe elapses — see
+                // sailfishos/lipstick src/components/launcheritem.{h,cpp}).
+                // Waiting for it to clear is the platform's own guarantee
+                // that the app has started, so our exit can never abort the
+                // launch (the old 300 ms quit did exactly that for
+                // slow-starting apps).
+                //
+                // The property is POLLED (plain JS property access), never
+                // connected via a signal: if a lipstick build lacks the
+                // property, the read yields undefined and the fallback below
+                // kicks in — no white-screen risk.
+                Timer {
+                    id: closeWait
+                    interval: 200
+                    repeat: true
+                    running: false
+                    property int ticks: 0
+                    onTriggered: {
+                        ticks++
+                        const launching = launcher.isLaunching
+                        if (launching === undefined) {
+                            // Property unavailable on this lipstick build:
+                            // plain delay (10 * 200 ms = 2 s, up from the
+                            // old 300 ms).
+                            if (ticks >= 10) {
+                                stop()
+                                closeQuit.start()
+                            }
+                        } else if (!launching || ticks >= 30) {
+                            // Platform says the launch is done — or our 6 s
+                            // cap (the platform's own failsafe is 5 s) as a
+                            // safety net.
+                            stop()
+                            closeQuit.start()
+                        }
+                    }
+                }
+
+                Timer {
+                    id: closeQuit
+                    interval: 250
+                    running: false
+                    onTriggered: Qt.quit()
                 }
 
                 Row {

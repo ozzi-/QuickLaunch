@@ -224,6 +224,11 @@ Page {
             Row {
                 id: typeFilter
 
+                // Settings -> "Show filter bar" (default on). Invisible
+                // children are skipped by the enclosing Column layout, so
+                // the list simply starts higher when hidden.
+                visible: QuickLaunchSettings.showFilterBar
+
                 width: parent.width
                 height: Theme.itemSizeLarge
                 focus: false

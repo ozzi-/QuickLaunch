@@ -25,3 +25,17 @@ void QuickLaunchSettings::setCloseAfterLaunch(bool closeAfterLaunch)
     m_settings->sync();
     emit closeAfterLaunchChanged();
 }
+
+bool QuickLaunchSettings::showFilterBar() const
+{
+    return m_settings->value("showFilterBar", true).toBool();
+}
+
+void QuickLaunchSettings::setShowFilterBar(bool showFilterBar)
+{
+    if (showFilterBar == m_settings->value("showFilterBar", true).toBool())
+        return;
+    m_settings->setValue("showFilterBar", showFilterBar);
+    m_settings->sync();
+    emit showFilterBarChanged();
+}

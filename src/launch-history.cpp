@@ -54,6 +54,15 @@ void LaunchHistory::recordLaunch(const QString &path)
     emit changed();
 }
 
+void LaunchHistory::clear()
+{
+    if (m_paths.isEmpty())
+        return;
+    m_paths.clear();
+    save();
+    emit changed();
+}
+
 
 void LaunchHistory::load()
 {

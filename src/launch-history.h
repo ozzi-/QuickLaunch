@@ -40,6 +40,9 @@ public:
     // trim to MAX_ENTRIES, persist, notify.
     Q_INVOKABLE void recordLaunch(const QString &path);
 
+    // Drop all entries (Settings -> "Reset"), persist, notify.
+    Q_INVOKABLE void clear();
+
 
 signals:
     void changed();

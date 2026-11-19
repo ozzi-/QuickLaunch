@@ -1,11 +1,11 @@
-Name: harbour-quick-launch
+Name: harbour-quick-launch-ozzi
 Summary: Quick Launcher Applications
-Version: 0.1
+Version: 1.7.0
 Release: 1
 # The contents of the Group field should be one of the groups listed here:
 # https://github.com/mer-tools/spectacle/blob/master/data/GROUPS
 Group: Qt/Qt
-URL: http://example.org/
+URL: https://github.com/ozzi-/QuickLaunch
 License: GPLv3
 # This must be generated before uploading a package to a remote build service.
 # Usually this line does not need to be modified.

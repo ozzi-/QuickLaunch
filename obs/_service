@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  OBS service file for the Chum submission of harbour-quick-launch-ozzi.
+
+  - Fetches the app source from the GitHub repository at a Pinned git tag
+    (Chum maintainer checklist: "specific git tag or commit ID", no webhooks).
+  - The generated source tarball is named to match the spec's
+    Source0: harbour-quick-launch-ozzi-<version>.tar.bz2.
+
+  To release a new version: bump the tag in `rev=` (and the spec Version),
+  re-trigger the build, then re-submit to sailfishos:chum:testing.
+-->
+<service>
+  <build>
+    <package name="harbour-quick-launch-ozzi-1.7.0.tar.bz2"
+             url="https://github.com/ozzi-/QuickLaunch.git"
+             scm="git"
+             rev="v1.7.0"/>
+  </build>
+</service>

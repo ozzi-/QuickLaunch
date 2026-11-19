@@ -58,16 +58,6 @@ Page {
         onTriggered: startFocusRetries()
     }
 
-    // "Close after launching" setting: quit the app shortly after the launch
-    // request has been handed to the launcher daemon. The short delay gives
-    // LauncherItem time to deliver the launch before our process exits.
-    Timer {
-        id: closeAfterLaunchTimer
-        interval: 300
-        running: false
-        onTriggered: Qt.quit()
-    }
-
     function grabFocus(){
         // forceActiveFocus() is the reliable lever (a focus off/on toggle is
         // not — that was the "keyboard never shows" regression). Re-mark focus
@@ -234,6 +224,11 @@ Page {
             Row {
                 id: typeFilter
 
+                // Settings -> "Show filter bar" (default on). Invisible
+                // children are skipped by the enclosing Column layout, so
+                // the list simply starts higher when hidden.
+                visible: QuickLaunchSettings.showFilterBar
+
                 width: parent.width
                 height: Theme.itemSizeLarge
                 focus: false
@@ -365,17 +360,77 @@ Page {
                     launcher.launchApplication()
                     // Reset to the original state: empty search, full list.
                     searchField.text = ""
-                    if (QuickLaunchSettings.closeAfterLaunch)
-                        closeAfterLaunchTimer.start()
-                    else
+                    if (QuickLaunchSettings.closeAfterLaunch) {
+                        closeWait.ticks = 0
+                        closeWait.restart()
+                    } else {
                         __silica_applicationwindow_instance.deactivate()
-                    // (If the app survives, focus + keyboard are re-grabbed
-                    //  automatically when the user comes back.)
+                        // (Focus + keyboard are re-grabbed automatically when
+                        //  the user comes back.)
+                    }
                 }
 
                 LauncherItem {
                     id: launcher
                     filePath: path
+                }
+
+                // "Close after launching": quit once the launch request has
+                // been DISPATCHED to the platform — not once the app is
+                // fully loaded.
+                //
+                // On SFOS 5 the launch is handled system-side (lipstick →
+                // sailjail/mapplauncherd, "the platform in control of the
+                // launching process"), so once the request has left our
+                // process, QuickLaunch's exit cannot abort the target app.
+                // lipstick's LauncherItem marks that moment with
+                // `isLaunching` (Q_PROPERTY bool, set right after the
+                // ContentAction/D-Bus launch request is issued — see
+                // sailfishos/lipstick src/components/launcheritem.{h,cpp}).
+                // We therefore wait for it to become TRUE, then quit after a
+                // short buffer. (The old approach waited for it to CLEAR,
+                // which means "app fully loaded" — up to the platform's 5 s
+                // failsafe. Rejected as too slow.)
+                //
+                // The property is POLLED (plain JS property access), never
+                // connected via a signal: if a lipstick build lacks the
+                // property, the read yields undefined and the fixed-delay
+                // fallback below kicks in — no white-screen risk.
+                Timer {
+                    id: closeWait
+                    interval: 200
+                    repeat: true
+                    running: false
+                    property int ticks: 0
+                    onTriggered: {
+                        ticks++
+                        const launching = launcher.isLaunching
+                        if (launching === undefined) {
+                            // Property unavailable on this lipstick build:
+                            // fixed delay (8 * 200 ms = 1.6 s).
+                            if (ticks >= 8) {
+                                stop()
+                                closeQuit.start()
+                            }
+                        } else if (launching === true) {
+                            // Platform has taken the launch over → safe to
+                            // exit. closeQuit adds the buffer.
+                            stop()
+                            closeQuit.start()
+                        } else if (ticks >= 15) {
+                            // Safety cap (3 s): if the flag never flips,
+                            // quit anyway rather than hang.
+                            stop()
+                            closeQuit.start()
+                        }
+                    }
+                }
+
+                Timer {
+                    id: closeQuit
+                    interval: 300
+                    running: false
+                    onTriggered: Qt.quit()
                 }
 
                 Row {

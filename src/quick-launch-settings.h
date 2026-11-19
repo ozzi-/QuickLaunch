@@ -14,6 +14,8 @@ class QuickLaunchSettings : public QObject
     Q_OBJECT
     Q_PROPERTY(bool closeAfterLaunch READ closeAfterLaunch
                WRITE setCloseAfterLaunch NOTIFY closeAfterLaunchChanged)
+    Q_PROPERTY(bool showFilterBar READ showFilterBar
+               WRITE setShowFilterBar NOTIFY showFilterBarChanged)
 
 public:
     static QuickLaunchSettings *instance();
@@ -21,8 +23,13 @@ public:
     bool closeAfterLaunch() const;
     void setCloseAfterLaunch(bool closeAfterLaunch);
 
+    // All / Native / Android / Recent filter bar (default: shown).
+    bool showFilterBar() const;
+    void setShowFilterBar(bool showFilterBar);
+
 signals:
     void closeAfterLaunchChanged();
+    void showFilterBarChanged();
 
 private:
     explicit QuickLaunchSettings();

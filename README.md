@@ -25,19 +25,20 @@ was missing day to day:
   and again whenever you return to it (including from the home-screen tile),
   so you can start typing immediately without tapping it.
 - **Close after launching (setting)** — in Settings you can make QuickLaunch
-  quit instead of minimizing when you launch an app. The preference is
-  persisted across sessions.
+  quit instead of minimizing when you launch an app. It quits as soon as the
+  launch has been handed over to the system — quick, and it can never abort
+  the app you just started. The preference is persisted across sessions.
 - **Clean state after launching** — launching an app resets the search field,
   so when you come back to QuickLaunch you always see the full list.
 - **App-type filter (All / Native / Android)** — a toggle above the list
   filters by app type. Android apps are detected by their `apkd-launcher` exec
   prefix; everything else is treated as native Sailfish. The filter applies
   to both the full list and search results. (A **Recent** segment sits next
-  to it — see below.)
+  to it — see below.) The bar can be hidden in Settings if you never use it.
 - **Recent apps** — a **Recent** segment next to the type filter lists the
   apps you have launched through QuickLaunch, most recent first. The list is
   persisted across sessions (bounded to 100 entries and pruned of uninstalled
-  apps, so it can never grow unboundedly).
+  apps, so it can never grow unboundedly) and can be reset in Settings.
 - **Sailfish OS 5.2 build** — the build setup was adapted to the SFOS 5.2 SDK
   (Qt 5.6.3), so the app compiles cleanly for current devices. RPM is provided
   for `aarch64`.

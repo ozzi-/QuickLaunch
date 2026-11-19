@@ -8,13 +8,18 @@ Page {
     allowedOrientations: Orientation.All
 
     // Page edge margin. Theme.horizontalPageMargin is what Silica prescribes,
-    // but on this phone it renders close to the edge — enforce a comfortable
-    // minimum (user-reported across 1.5.0-3/5: bump 24 → 28 → 40).
+    // but on this phone the text ended up flush with the screen edge —
+    // enforce a comfortable minimum (user-reported across 1.5.0-3/5/6).
     readonly property real pageMargin: Math.max(Theme.horizontalPageMargin, 40)
 
+    // IMPORTANT (1.5.0-7): rows are plain Items, NOT Rows. A Row re-positions
+    // its children during layout and STOMPS the explicit x of the label
+    // column (margin vanished on the phone — see screenshot from the user).
+    // A plain Item container honors explicit child x/y.
+    //
     // Only components verified to exist in this Silica (see HANDOFF.md
     // white-screen rule): PageHeader, Label, Switch, SilicaFlickable.
-    // Everything else is core QtQuick (Row/Column/Rectangle/Text/MouseArea).
+    // Everything else is core QtQuick (Item/Column/Rectangle/Text/MouseArea).
     SilicaFlickable {
         anchors.fill: parent
         contentHeight: column.height
@@ -31,7 +36,7 @@ Page {
             // ------------------------------------------------------------
             // Close after launching
             // ------------------------------------------------------------
-            Row {
+            Item {
                 id: closeRow
                 width: parent.width
                 height: Theme.itemSizeLarge * 1.6
@@ -81,13 +86,17 @@ Page {
             }
 
             // ------------------------------------------------------------
-            // Recent history — Reset
+            // Recent history — Reset (with confirmation feedback)
             // ------------------------------------------------------------
-            Row {
+            Item {
                 id: historyRow
                 width: parent.width
                 height: Theme.itemSizeLarge * 1.6
                 focus: false
+
+                // Feedback: after a reset the button says "Cleared" for a
+                // moment and turns greenish, then reverts.
+                property bool justReset: false
 
                 Column {
                     id: historyLabels
@@ -122,12 +131,12 @@ Page {
                     width: resetText.width + 2 * Theme.paddingMedium
                     height: Theme.itemSizeMedium * 0.9
                     radius: height / 2
-                    color: Theme.highlightColor
+                    color: historyRow.justReset ? "#5cb85c" : Theme.highlightColor
 
                     Text {
                         id: resetText
                         anchors.centerIn: parent
-                        text: qsTr("Reset")
+                        text: historyRow.justReset ? qsTr("Cleared") : qsTr("Reset")
                         color: "white"
                         font.pixelSize: Theme.fontSizeMedium
                     }
@@ -137,17 +146,24 @@ Page {
                         focus: false
                         onClicked: {
                             LaunchHistory.clear()
-                            // Visual feedback: the "Recent" filter list
-                            // updates via LaunchHistory::changed.
+                            historyRow.justReset = true
+                            resetFeedback.restart()
                         }
                     }
+                }
+
+                Timer {
+                    id: resetFeedback
+                    interval: 1500
+                    running: false
+                    onTriggered: historyRow.justReset = false
                 }
             }
 
             // ------------------------------------------------------------
             // Show filter bar (All / Native / Android / Recent)
             // ------------------------------------------------------------
-            Row {
+            Item {
                 id: filterBarRow
                 width: parent.width
                 height: Theme.itemSizeLarge * 1.6

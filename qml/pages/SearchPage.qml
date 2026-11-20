@@ -157,6 +157,19 @@ Page {
         }
     }
 
+    // Hiding the filter bar (Settings) must also reset the search UI:
+    // otherwise the list stays silently filtered (e.g. "Android" or a
+    // leftover search text) with no bar left to change it back.
+    Connections {
+        target: QuickLaunchSettings
+        onShowFilterBarChanged: {
+            if (!QuickLaunchSettings.showFilterBar) {
+                filterModel.filterMode = 0
+                searchField.text = ""
+            }
+        }
+    }
+
     CoverActionList {
         id: coverAction
 

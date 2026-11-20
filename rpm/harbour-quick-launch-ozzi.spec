@@ -10,7 +10,7 @@ Name:       harbour-quick-launch-ozzi
 
 Summary:    Quick Launch Applications
 Version:    1.7.0
-Release:    2
+Release:    1
 Group:      Qt/Qt
 License:    GPLv3
 URL:        https://github.com/ozzi-/QuickLaunch

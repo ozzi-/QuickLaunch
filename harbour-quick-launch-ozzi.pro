@@ -10,11 +10,13 @@
 #   - translation filenames have to be changed
 
 # Version
-VERSION = 1.6.0
+VERSION = 1.7.0
 DEFINES += APP_VERSION=\\\"$$VERSION\\\"
 
 # The name of your application
-TARGET = harbour-quick-launch
+# (renamed for the Chum/OBS publication — the original name is taken by
+# the upstream v1.0 package there; see obs/README.md)
+TARGET = harbour-quick-launch-ozzi
 
 CONFIG += sailfishapp
 QT += core-private
@@ -34,12 +36,12 @@ DISTFILES += qml/QuickLauncher.qml \
     qml/pages/LaunchPage.qml \
     qml/pages/SearchPage.qml \
     qml/pages/Settings.qml \
-    rpm/harbour-quick-launch.changes.in \
-    rpm/harbour-quick-launch.changes.run.in \
-    rpm/harbour-quick-launch.spec \
-    rpm/harbour-quick-launch.yaml \
-    translations/*.ts \
-    harbour-quick-launch.desktop
+    rpm/QuickLauncher.changes.in \
+    rpm/QuickLauncher.changes.run.in \
+    rpm/harbour-quick-launch-ozzi.spec \
+    translations/harbour-quick-launch-ozzi.ts \
+    translations/harbour-quick-launch-ozzi-de.ts \
+    harbour-quick-launch-ozzi.desktop
 
 SAILFISHAPP_ICONS = 86x86 108x108 128x128 172x172
 
@@ -51,7 +53,7 @@ CONFIG += sailfishapp_i18n
 # planning to localize your app, remember to comment out the
 # following TRANSLATIONS line. And also do not forget to
 # modify the localized app name in the the .desktop file.
-TRANSLATIONS += translations/harbour-quick-launch-de.ts
+TRANSLATIONS += translations/harbour-quick-launch-ozzi-de.ts
 
 HEADERS += src/app-list-model.h \
     src/app-list-filter-model.h \

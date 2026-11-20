@@ -6,11 +6,12 @@ is already taken there by the upstream v1.0 package of Jaume Singla).
 
 Everything is built **from source on the official Sailfish OS OBS**
 (`build.sailfishos.org`), for all supported architectures and SFOS releases.
-This folder contains the OBS pipeline:
+The OBS pipeline consists of two files in this repo:
 
-- `_service` — fetches the repo source at a pinned git tag (v1.7.0) and
+- `_service` (repo root — the location OBS expects when you upload it)
+  — fetches the repo source at a pinned git tag (v1.7.0) and
   produces the `Source0` tarball the spec expects.
-- `../rpm/harbour-quick-launch-ozzi.spec` — the packaging (identical to the
+- `rpm/harbour-quick-launch-ozzi.spec` — the packaging (identical to the
   one used for local/SDK builds; the spec also carries the Chum listing
   metadata via the `%if 0%{?_chum}` block).
 
@@ -28,7 +29,7 @@ This folder contains the OBS pipeline:
 2. Add two files to the package:
    - `harbour-quick-launch-ozzi.spec` (upload
      `rpm/harbour-quick-launch-ozzi.spec` from this repo),
-   - `_service` (upload `obs/_service` from this repo).
+   - `_service` (upload the `_service` at the repo root).
 3. Wait for the build to go green (it builds against `sailfishos:latest`,
    i.e. the current SFOS release, for armv7hl + aarch64).
    - CLI alternative to watching: `osc brl home:<username> harbour-quick-launch-ozzi`.
@@ -42,7 +43,7 @@ This folder contains the OBS pipeline:
 
 1. In this repo: bump `VERSION` in `harbour-quick-launch-ozzi.pro` +
    `Version:` in the spec, push, tag (`git tag v1.8.0 && git push --tags`).
-2. Update `rev=` in `obs/_service` to the new tag, push.
+2. Update `rev=` in the root `_service` to the new tag, push.
 3. On OBS: reload/re-trigger the build in `home:<username>` (or in
    `sailfishos:chum:testing` once you have been granted maintainer there),
    then “Submit package” to `sailfishos:chum:testing` again.

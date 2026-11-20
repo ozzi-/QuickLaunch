@@ -39,7 +39,6 @@ DISTFILES += qml/QuickLauncher.qml \
     rpm/QuickLauncher.changes.in \
     rpm/QuickLauncher.changes.run.in \
     rpm/harbour-quick-launch-ozzi.spec \
-    rpm/harbour-quick-launch-ozzi.yaml \
     translations/harbour-quick-launch-ozzi.ts \
     translations/harbour-quick-launch-ozzi-de.ts \
     harbour-quick-launch-ozzi.desktop

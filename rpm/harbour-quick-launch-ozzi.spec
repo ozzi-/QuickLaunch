@@ -10,7 +10,7 @@ Name:       harbour-quick-launch-ozzi
 
 Summary:    Quick Launch Applications
 Version:    1.7.0
-Release:    1
+Release:    3
 Group:      Qt/Qt
 License:    GPLv3
 URL:        https://github.com/ozzi-/QuickLaunch
@@ -68,7 +68,14 @@ Url:
 # >> build pre
 # << build pre
 
-cd %{_builddir}/%{name}-%{version}
+# mb2 (aarch64) unpacks the source into %{_builddir}/%{name}-%{version}; the sfdk
+# build engine builds IN PLACE at %{_builddir}. Resolve the source root
+# defensively so both work.
+if [ -d %{_builddir}/%{name}-%{version} ]; then
+    cd %{_builddir}/%{name}-%{version}
+else
+    cd %{_builddir}
+fi
 qmake harbour-quick-launch-ozzi.pro
 make %{?_smp_mflags}
 
@@ -77,7 +84,12 @@ make %{?_smp_mflags}
 
 %install
 rm -rf %{buildroot}
-cd %{_builddir}/%{name}-%{version}
+# Same in-place caveat as the build section.
+if [ -d %{_builddir}/%{name}-%{version} ]; then
+    cd %{_builddir}/%{name}-%{version}
+else
+    cd %{_builddir}
+fi
 # >> install pre
 # << install pre
 make INSTALL_ROOT=%{buildroot} install

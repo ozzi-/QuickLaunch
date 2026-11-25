@@ -170,6 +170,66 @@ Page {
         }
     }
 
+    // ------------------------------------------------------------------
+    // "Close after launch" — PAGE-LEVEL close sequence.
+    //
+    // In v1.5/v1.6 these timers lived inside the list delegate. Launching
+    // an app records it in the Recent history, which does a full model
+    // reset — and item views recycle delegates on resets, so a close timer
+    // living in the clicked delegate can be destroyed mid-flight and the
+    // app never quits (the reported "launching an Android app leaves
+    // QuickLaunch open" failure). At page level the sequence is immune to
+    // delegate recycling and to any model churn.
+    //
+    // FAST PATH: quit as soon as lipstick has DISPATCHED the launch —
+    // LauncherItem::launchWithArguments() sets isLaunching=true right
+    // after the ContentAction trigger (sailfishos/lipstick
+    // src/components/launcheritem.cpp), so once it is true our exit can
+    // no longer abort the target app.
+    //
+    // HARD GUARANTEE: no matter what happens (launch error, property
+    // missing, delegate gone), the 3 s cap below quits the app.
+    property var closeTarget: null
+
+    Timer {
+        id: closeWait
+        interval: 200
+        repeat: true
+        running: false
+        property int ticks: 0
+        onTriggered: {
+            ticks++
+            var launching = false
+            try {
+                if (closeTarget)
+                    launching = closeTarget.isLaunching
+            } catch (err) {
+                launching = false   // launcher object gone — the cap still quits
+            }
+            if (ticks === 1 || launching === true || ticks >= 15)
+                QuickLaunchSettings.dbgLog("closeWait tick " + ticks
+                                            + " isLaunching=" + String(launching))
+            if (launching === true) {
+                stop()
+                closeQuit.start()
+            } else if (ticks >= 15) {
+                // Hard cap (3 s after the click): quit no matter what.
+                stop()
+                closeQuit.start()
+            }
+        }
+    }
+
+    Timer {
+        id: closeQuit
+        interval: 300
+        running: false
+        onTriggered: {
+            QuickLaunchSettings.dbgLog("closeQuit -> Qt.quit()")
+            Qt.quit()
+        }
+    }
+
     CoverActionList {
         id: coverAction
 
@@ -370,13 +430,29 @@ Page {
                     // Remember this app for the "Recent" view (persisted,
                     // bounded to 100 entries in C++).
                     LaunchHistory.recordLaunch(path)
-                    launcher.launchApplication()
-                    // Reset to the original state: empty search, full list.
-                    searchField.text = ""
+
+                    // Close-after-launch: hand the page-level sequence this
+                    // row's launcher, then request the launch. try/catch:
+                    // a dispatch error must never stop the close sequence —
+                    // the setting means "close after I clicked".
+                    closeTarget = launcher
+                    try {
+                        launcher.launchApplication()
+                    } catch (err) {
+                        QuickLaunchSettings.dbgLog("launchApplication(" + path
+                                                    + ") threw: " + err.toString())
+                    }
+
                     if (QuickLaunchSettings.closeAfterLaunch) {
+                        // Do NOT reset the UI (search text / list state):
+                        // the app is about to quit, and the reset's model
+                        // churn races the close sequence.
+                        QuickLaunchSettings.dbgLog("close-sequence start: " + path)
                         closeWait.ticks = 0
                         closeWait.restart()
                     } else {
+                        // Reset to the original state: empty search, full list.
+                        searchField.text = ""
                         __silica_applicationwindow_instance.deactivate()
                         // (Focus + keyboard are re-grabbed automatically when
                         //  the user comes back.)
@@ -386,64 +462,6 @@ Page {
                 LauncherItem {
                     id: launcher
                     filePath: path
-                }
-
-                // "Close after launching": quit once the launch request has
-                // been DISPATCHED to the platform — not once the app is
-                // fully loaded.
-                //
-                // On SFOS 5 the launch is handled system-side (lipstick →
-                // sailjail/mapplauncherd, "the platform in control of the
-                // launching process"), so once the request has left our
-                // process, QuickLaunch's exit cannot abort the target app.
-                // lipstick's LauncherItem marks that moment with
-                // `isLaunching` (Q_PROPERTY bool, set right after the
-                // ContentAction/D-Bus launch request is issued — see
-                // sailfishos/lipstick src/components/launcheritem.{h,cpp}).
-                // We therefore wait for it to become TRUE, then quit after a
-                // short buffer. (The old approach waited for it to CLEAR,
-                // which means "app fully loaded" — up to the platform's 5 s
-                // failsafe. Rejected as too slow.)
-                //
-                // The property is POLLED (plain JS property access), never
-                // connected via a signal: if a lipstick build lacks the
-                // property, the read yields undefined and the fixed-delay
-                // fallback below kicks in — no white-screen risk.
-                Timer {
-                    id: closeWait
-                    interval: 200
-                    repeat: true
-                    running: false
-                    property int ticks: 0
-                    onTriggered: {
-                        ticks++
-                        const launching = launcher.isLaunching
-                        if (launching === undefined) {
-                            // Property unavailable on this lipstick build:
-                            // fixed delay (8 * 200 ms = 1.6 s).
-                            if (ticks >= 8) {
-                                stop()
-                                closeQuit.start()
-                            }
-                        } else if (launching === true) {
-                            // Platform has taken the launch over → safe to
-                            // exit. closeQuit adds the buffer.
-                            stop()
-                            closeQuit.start()
-                        } else if (ticks >= 15) {
-                            // Safety cap (3 s): if the flag never flips,
-                            // quit anyway rather than hang.
-                            stop()
-                            closeQuit.start()
-                        }
-                    }
-                }
-
-                Timer {
-                    id: closeQuit
-                    interval: 300
-                    running: false
-                    onTriggered: Qt.quit()
                 }
 
                 Row {

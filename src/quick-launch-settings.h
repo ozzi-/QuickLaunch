@@ -27,6 +27,13 @@ public:
     bool showFilterBar() const;
     void setShowFilterBar(bool showFilterBar);
 
+    // Diagnostic file logging. The phone suppresses qDebug()/journal for
+    // app processes; a plain file under the app data dir (next to the
+    // Recent history) is the only reliable sink — same technique that
+    // cracked the keyboard bugs. Appends one timestamped line, caps the
+    // file so it can never grow unboundedly.
+    Q_INVOKABLE void dbgLog(const QString &line);
+
 signals:
     void closeAfterLaunchChanged();
     void showFilterBarChanged();

@@ -12,9 +12,9 @@
 -->
 <service>
   <build>
-    <package name="harbour-quick-launch-ozzi-1.7.0.tar.bz2"
+    <package name="harbour-quick-launch-ozzi-1.8.0.tar.bz2"
              url="https://github.com/ozzi-/QuickLaunch.git"
              scm="git"
-             rev="v1.7.0"/>
+             rev="v1.8.0"/>
   </build>
 </service>
